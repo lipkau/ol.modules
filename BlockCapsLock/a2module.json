@@ -1,0 +1,30 @@
+[
+  {
+    "author": "Oliver Lipkau",
+    "date": "2016 11 12",
+    "description": "Avoid accidental activations of CapsLock",
+    "typ": "nfo",
+    "url": "",
+    "version": "0.1"
+  },
+  {
+    "file": "BlockCapsLock.ahk",
+    "typ": "include"
+  },
+  {
+    "disablable": false,
+    "enabled": true,
+    "functionCode": "BlockCapsLock_callback()",
+    "functionMode": 0,
+    "key": "Capslock",
+    "keyChange": false,
+    "label": "",
+    "mode": "ahk",
+    "multiple": false,
+    "name": "BlockCapsLock_Hotkey",
+    "scope": [],
+    "scopeChange": false,
+    "scopeMode": 0,
+    "typ": "hotkey"
+  }
+]
