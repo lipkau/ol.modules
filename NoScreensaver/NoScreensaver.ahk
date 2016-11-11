@@ -3,12 +3,17 @@ class NoScreensaver {
 
     onLoad()
     {
-        this.Activate()
+        ListVars
+        ; tt("[DEBUG.NoScreensaver] Loaded")
+        if (this.defaultState)
+            this.Activate()
     }
 
     ResetTimeIdle()
     {
+        ; tt("[DEBUG.NoScreensaver] idle counter: " . A_TimeIdle)
         if (A_TimeIdle > this.timeout) {
+            ; tt("[DEBUG.NoScreensaver] tiggered!")
             SendInput {ScrollLock}{ScrollLock}
         }
     }
@@ -17,14 +22,14 @@ class NoScreensaver {
     {
         SetTimer, MoveMouseOnIdle, 2000
         this.active := true
-        tt("Active: " . this.active)
+        ; tt("[DEBUG.NoScreensaver] Activeted")
     }
 
     Deactivate()
     {
         SetTimer, MoveMouseOnIdle, Off
         this.active := false
-        tt("Deactive: " . this.active)
+        ; tt("[DEBUG.NoScreensaver] Deactivated")
     }
 
     Toggle()
@@ -40,20 +45,18 @@ class NoScreensaver {
     timeout[]
     {
         get {
-            global Timeout_Number
-            return Timeout_Number * 1000
+            global NoScreensaver_timeout
+            return NoScreensaver_timeout * 1000 * 60
         }
     }
-}
 
-foo()
-{
-    NoScreensaver.onLoad()
-}
-
-bar()
-{
-    NoScreensaver.Toggle()
+    defaultState[]
+    {
+        get {
+            global NoScreensaver_defaultState
+            return NoScreensaver_defaultState
+        }
+    }
 }
 
 MoveMouseOnIdle:
