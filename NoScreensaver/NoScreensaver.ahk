@@ -37,14 +37,14 @@ class NoScreensaver {
 
     Activate()
     {
-        SetTimer, ResetTimeIdle, 2000
+        SetTimer, NoScreenSaver_ResetTimeIdle, 2000
         this.active := true
         ; tt("[DEBUG.NoScreensaver] Activeted")
     }
 
     Deactivate()
     {
-        SetTimer, ResetTimeIdle, Off
+        SetTimer, NoScreenSaver_ResetTimeIdle, Off
         this.active := false
         ; tt("[DEBUG.NoScreensaver] Deactivated")
     }
@@ -86,3 +86,7 @@ class NoScreensaver {
         }
     }
 }
+
+NoScreenSaver_ResetTimeIdle:
+    NoScreensaver.ResetTimeIdle()
+return
