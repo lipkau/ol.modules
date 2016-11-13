@@ -1,0 +1,30 @@
+[
+  {
+    "author": "Oliver Lipkau",
+    "date": "2016 11 13",
+    "description": "Shorten a URL with one keystroke",
+    "typ": "nfo",
+    "url": "https://github.com/lipkau/ol.modules/wiki/urlShortener",
+    "version": "0.1"
+  },
+  {
+    "file": "urlShortener.ahk",
+    "typ": "include"
+  },
+  {
+    "disablable": false,
+    "enabled": true,
+    "functionCode": "urlShortener.Execute()",
+    "functionMode": 0,
+    "key": "Win+G",
+    "keyChange": true,
+    "label": "Hotkey to shorten a URL",
+    "mode": "ahk",
+    "multiple": true,
+    "name": "urlShortener_Hotkey",
+    "scope": [],
+    "scopeChange": true,
+    "scopeMode": 0,
+    "typ": "hotkey"
+  }
+]
