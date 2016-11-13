@@ -1,0 +1,81 @@
+[
+  {
+    "author": "Oliver Lipkau",
+    "date": "2016 11 13",
+    "description": "Take ScreenShots & more",
+    "typ": "nfo",
+    "url": "https://github.com/lipkau/ol.modules/wiki/ScreenShotTool",
+    "version": "0.1"
+  },
+  {
+    "file": "ScreenShotTools.ahk",
+    "typ": "include"
+  },
+  {
+    "disablable": true,
+    "enabled": true,
+    "functionMode": 0,
+    "key": "Printscreen",
+    "keyChange": true,
+    "label": "This event takes a screenshot and shows it in image converter for further processing.",
+    "mode": "ahk",
+    "multiple": false,
+    "name": "ScreenShotTool_Hotkek_FullScreen",
+    "scope": [],
+    "scopeChange": true,
+    "scopeMode": 0,
+    "typ": "hotkey"
+  },
+  {
+    "disablable": true,
+    "enabled": true,
+    "functionMode": 0,
+    "key": "Alt+Printscreen",
+    "keyChange": true,
+    "label": "This event takes a screenshot of an area that can be selected by the user and shows it in image converter for further processing.",
+    "mode": "ahk",
+    "multiple": false,
+    "name": "ScreenShotTool_Hotkey_DrawArea",
+    "scope": [],
+    "scopeChange": true,
+    "scopeMode": 0,
+    "typ": "hotkey"
+  },
+  {
+    "disablable": true,
+    "enabled": true,
+    "functionMode": 0,
+    "key": "Win+Printscreen",
+    "keyChange": true,
+    "label": "This event takes a screenshot of the active window and shows it in image converter for further processing.",
+    "mode": "ahk",
+    "multiple": false,
+    "name": "ScreenShotTool_Hotkey_ActiveWindow",
+    "scope": [],
+    "scopeChange": true,
+    "scopeMode": 0,
+    "typ": "hotkey"
+  },
+  {
+    "label": "Auto generate filenames",
+    "name": "ScreenShotTool_AutoNaming",
+    "typ": "check",
+    "value": false
+  },
+  {
+    "browse_type": "0",
+    "file_types": "",
+    "label": "ScreenShots are saved in",
+    "name": "ScreenShotTool_TargetPath",
+    "save_mode": false,
+    "typ": "path",
+    "value": "%AppData%\\a2\\ol.modules\\ScreenShotTool",
+    "writable": true
+  },
+  {
+    "label": "Open file in Image Manager",
+    "name": "ScreenShotTool_openInManager",
+    "typ": "check",
+    "value": false
+  }
+]
