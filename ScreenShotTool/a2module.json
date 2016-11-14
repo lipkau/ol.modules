@@ -14,6 +14,7 @@
   {
     "disablable": true,
     "enabled": true,
+    "functionCode": "ScreenShotTool.TakeScreenShot(\"\")",
     "functionMode": 0,
     "key": "Printscreen",
     "keyChange": true,
@@ -29,6 +30,7 @@
   {
     "disablable": true,
     "enabled": true,
+    "functionCode": "ScreenShotTool.TakeScreenShot(\"Area\")",
     "functionMode": 0,
     "key": "Alt+Printscreen",
     "keyChange": true,
@@ -44,6 +46,7 @@
   {
     "disablable": true,
     "enabled": true,
+    "functionCode": "ScreenShotTool.TakeScreenShot(\"Window\")",
     "functionMode": 0,
     "key": "Win+Printscreen",
     "keyChange": true,
