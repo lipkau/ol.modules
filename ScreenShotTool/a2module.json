@@ -12,73 +12,185 @@
     "typ": "include"
   },
   {
-    "disablable": true,
+    "code": "ScreenShotTool.Init()",
+    "typ": "init"
+  },
+  {
+    "children": [
+      {
+        "disablable": true,
+        "enabled": true,
+        "functionCode": "ScreenShotTool.TakeScreenShot(\"All\")",
+        "functionMode": 0,
+        "key": "Printscreen",
+        "keyChange": true,
+        "label": "Take a Screenshot",
+        "mode": "ahk",
+        "multiple": false,
+        "name": "ScreenShotTool_Hotkek_FullScreen",
+        "scope": [],
+        "scopeChange": true,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      },
+      {
+        "disablable": true,
+        "enabled": true,
+        "functionCode": "ScreenShotTool.TakeScreenShot(\"Area\")",
+        "functionMode": 0,
+        "key": "Alt+Printscreen",
+        "keyChange": true,
+        "label": "Take a Screenshot of a specific area.",
+        "mode": "ahk",
+        "multiple": false,
+        "name": "ScreenShotTool_Hotkey_DrawArea",
+        "scope": [],
+        "scopeChange": true,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      },
+      {
+        "disablable": true,
+        "enabled": true,
+        "functionCode": "ScreenShotTool.TakeScreenShot(\"LastArea\")",
+        "functionMode": 0,
+        "key": "Win+Alt+Printscreen",
+        "keyChange": true,
+        "label": "Take a Screenshot of the last selected area.",
+        "mode": "ahk",
+        "multiple": false,
+        "name": "ScreenShotTool_Hotkey_LastArea",
+        "scope": [],
+        "scopeChange": true,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      },
+      {
+        "disablable": true,
+        "enabled": true,
+        "functionCode": "ScreenShotTool.TakeScreenShot(\"Window\")",
+        "functionMode": 0,
+        "key": "Win+Printscreen",
+        "keyChange": true,
+        "label": "Take a Screenshot of the active window.",
+        "mode": "ahk",
+        "multiple": false,
+        "name": "ScreenShotTool_Hotkey_ActiveWindow",
+        "scope": [],
+        "scopeChange": true,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      },
+      {
+        "disablable": true,
+        "enabled": true,
+        "functionCode": "ScreenShotTool.TakeScreenShot(\"Monitor\")",
+        "functionMode": 0,
+        "key": "Shift+Printscreen",
+        "keyChange": true,
+        "label": "Take a Screenshot of the current monitor.",
+        "mode": "ahk",
+        "multiple": false,
+        "name": "ScreenShotTool_Hotkey_CurrentMonitor",
+        "scope": [],
+        "scopeChange": true,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      }
+    ],
+    "disablable": false,
     "enabled": true,
-    "functionCode": "ScreenShotTool.TakeScreenShot(\"\")",
-    "functionMode": 0,
-    "key": "Printscreen",
-    "keyChange": true,
-    "label": "This event takes a screenshot and shows it in image converter for further processing.",
-    "mode": "ahk",
-    "multiple": false,
-    "name": "ScreenShotTool_Hotkek_FullScreen",
-    "scope": [],
-    "scopeChange": true,
-    "scopeMode": 0,
-    "typ": "hotkey"
+    "label": "Hotkeys",
+    "name": "ScreenShotTool_HotkeyGroup",
+    "typ": "group"
   },
   {
-    "disablable": true,
+    "children": [
+      {
+        "label": "Auto-generate file names",
+        "name": "ScreenShotTool_AutoNaming",
+        "typ": "check",
+        "value": false
+      },
+      {
+        "label": "Visual feedback",
+        "name": "ScreenShotTool_VisualFeedback",
+        "typ": "check",
+        "value": true
+      },
+      {
+        "label": "Acustic feedback",
+        "name": "ScreenShotTool_AcusticFeedback",
+        "typ": "check",
+        "value": true
+      },
+      {
+        "label": "Always store Screenshot in clipboard",
+        "name": "ScreenShotTool_StoreInClipboard",
+        "typ": "check",
+        "value": true
+      },
+      {
+        "browse_type": "0",
+        "file_types": "",
+        "label": "ScreenShots are saved in",
+        "name": "ScreenShotTool_TargetPath",
+        "save_mode": false,
+        "typ": "path",
+        "value": "%AppData%\\a2\\ol.modules\\ScreenShotTool",
+        "writable": true
+      },
+      {
+        "decimals": 0,
+        "label": "Delay before taking a Screenshot",
+        "max": 30.0,
+        "min": 0.0,
+        "name": "ScreenShotTool_Timer",
+        "slider": true,
+        "step_len": 1.0,
+        "suffix": "seconds",
+        "typ": "number",
+        "value": 0
+      },
+      {
+        "decimals": 0,
+        "label": "Image quality",
+        "max": 100.0,
+        "min": 10.0,
+        "name": "ScreenShotTool_Quality",
+        "slider": true,
+        "step_len": 5.0,
+        "suffix": "%",
+        "typ": "number",
+        "value": 95
+      },
+      {
+        "decimals": 0,
+        "label": "Image scaling",
+        "max": 200.0,
+        "min": 10.0,
+        "name": "ScreenShotTool_Scaling",
+        "slider": true,
+        "step_len": 5.0,
+        "suffix": "%",
+        "typ": "number",
+        "value": 100
+      },
+      {
+        "label": "Open file in Image Manager",
+        "name": "ScreenShotTool_openInManager",
+        "typ": "check",
+        "value": true
+      },
+      {
+        "text": "<i>This is only available if the <b>ImageConverter</b> module is active.</i>",
+        "typ": "label"
+      }
+    ],
+    "disablable": false,
     "enabled": true,
-    "functionCode": "ScreenShotTool.TakeScreenShot(\"Area\")",
-    "functionMode": 0,
-    "key": "Alt+Printscreen",
-    "keyChange": true,
-    "label": "This event takes a screenshot of an area that can be selected by the user and shows it in image converter for further processing.",
-    "mode": "ahk",
-    "multiple": false,
-    "name": "ScreenShotTool_Hotkey_DrawArea",
-    "scope": [],
-    "scopeChange": true,
-    "scopeMode": 0,
-    "typ": "hotkey"
-  },
-  {
-    "disablable": true,
-    "enabled": true,
-    "functionCode": "ScreenShotTool.TakeScreenShot(\"Window\")",
-    "functionMode": 0,
-    "key": "Win+Printscreen",
-    "keyChange": true,
-    "label": "This event takes a screenshot of the active window and shows it in image converter for further processing.",
-    "mode": "ahk",
-    "multiple": false,
-    "name": "ScreenShotTool_Hotkey_ActiveWindow",
-    "scope": [],
-    "scopeChange": true,
-    "scopeMode": 0,
-    "typ": "hotkey"
-  },
-  {
-    "label": "Auto generate filenames",
-    "name": "ScreenShotTool_AutoNaming",
-    "typ": "check",
-    "value": false
-  },
-  {
-    "browse_type": "0",
-    "file_types": "",
-    "label": "ScreenShots are saved in",
-    "name": "ScreenShotTool_TargetPath",
-    "save_mode": false,
-    "typ": "path",
-    "value": "%AppData%\\a2\\ol.modules\\ScreenShotTool",
-    "writable": true
-  },
-  {
-    "label": "Open file in Image Manager",
-    "name": "ScreenShotTool_openInManager",
-    "typ": "check",
-    "value": false
+    "label": "Settings",
+    "name": "ScreenShotTool_SettingsGroup",
+    "typ": "group"
   }
 ]
