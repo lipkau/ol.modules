@@ -10,14 +10,25 @@
  */
 
 class KeepAlive {
+    /**
+     * current state of the module
+     *
+     * @type {[bool]}
+     */
     static Active := false
 
+    /**
+     * method to initialize the module
+     */
     Init()
     {
         if (this._enabledByDefault)
             this.Activate()
     }
 
+    /**
+     * method to reset the PC's idle time when it reaches a threshold
+     */
     ResetTimeIdle()
     {
         if (A_TimeIdle > this.timeout) {
@@ -42,6 +53,9 @@ class KeepAlive {
         Notify("KeepAlive dectivated", "", 2, NotifyIcons.Success)
     }
 
+    /**
+     * method to toggle the active state of the module
+     */
     Toggle()
     {
         if (this.active)
@@ -52,6 +66,9 @@ class KeepAlive {
         }
     }
 
+    /**
+     * threshold for when to reset idle time
+     */
     timeout[]
     {
         get {
@@ -60,6 +77,9 @@ class KeepAlive {
         }
     }
 
+    /**
+     * user choice if the module should be active by default
+     */
     _enabledByDefault[]
     {
         get {
