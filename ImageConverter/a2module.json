@@ -2,9 +2,9 @@
   {
     "author": "Oliver Lipkau",
     "date": "2016 11 14",
-    "description": "Because none existed before this temporary description was created for \"ImageConverter\". Change it to describe what it does with a couple of words.",
+    "description": "Neat tool to manage Images. It allows you to convert between formats and much more.",
     "typ": "nfo",
-    "url": "",
+    "url": "https://github.com/lipkau/ol.modules/wiki/ImageConverter",
     "version": "0.1"
   },
   {
