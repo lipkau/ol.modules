@@ -26,5 +26,15 @@
     "scopeChange": true,
     "scopeMode": 0,
     "typ": "hotkey"
+  },
+  {
+    "items": [
+      "goo.gl",
+      "tny.im"
+    ],
+    "label": "Choose a service",
+    "name": "urlShortener_Service",
+    "typ": "combo",
+    "user_edit": false
   }
 ]
