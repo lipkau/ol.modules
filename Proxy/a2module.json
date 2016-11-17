@@ -1,0 +1,87 @@
+[
+  {
+    "author": "Oliver Lipkau",
+    "date": "2016 11 14",
+    "description": "Set up your Proxy Settings for other modules.",
+    "typ": "nfo",
+    "url": "https://github.com/lipkau/ol.modules/wiki/Proxy",
+    "version": "0.1"
+  },
+  {
+    "file": "Proxy.ahk",
+    "typ": "include"
+  },
+  {
+    "code": "Proxy_Init()",
+    "typ": "init"
+  },
+  {
+    "children": [
+      {
+        "label": "Proxy Address",
+        "name": "Proxy_Address",
+        "typ": "string",
+        "value": ""
+      },
+      {
+        "label": "Proxy Port",
+        "name": "Proxy_Port",
+        "typ": "string",
+        "value": ""
+      },
+      {
+        "items": [
+          "HTTP",
+          "SOCKS4",
+          "SOCKS5"
+        ],
+        "label": "Proxy Type",
+        "name": "Proxy_Protocol",
+        "typ": "combo",
+        "user_edit": false
+      }
+    ],
+    "disablable": false,
+    "enabled": true,
+    "label": "Settings",
+    "name": "Proxy_Settings",
+    "typ": "group"
+  },
+  {
+    "children": [
+      {
+        "label": "Use Authentication",
+        "name": "Proxy_UseAuthentication",
+        "typ": "check",
+        "value": false
+      },
+      {
+        "items": [
+          "Basic",
+          "NTLM"
+        ],
+        "label": "Authentication Type",
+        "name": "Proxy_Authentication_Type",
+        "typ": "combo",
+        "user_edit": false
+      },
+      {
+        "label": "Username",
+        "name": "Proxy_Authentication_User",
+        "typ": "string",
+        "value": ""
+      },
+      {
+        "label": "Password",
+        "name": "Proxy_Authentication_Password",
+        "typ": "string",
+        "value": ""
+      }
+    ],
+    "disablable": false,
+    "enabled": true,
+    "label": "Authentication",
+    "name": "Proxy_Authentication",
+    "typ": "group"
+  }
+]

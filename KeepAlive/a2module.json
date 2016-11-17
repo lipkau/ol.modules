@@ -1,0 +1,46 @@
+[
+  {
+    "author": "Oliver Lipkau",
+    "date": "2016 11 11",
+    "description": "Keep your computer from activating the screensaver",
+    "typ": "nfo",
+    "url": "https://github.com/lipkau/ol.modules/wiki/KeepAlive",
+    "version": "0.1"
+  },
+  {
+    "file": "KeepAlive.ahk",
+    "typ": "include"
+  },
+  {
+    "code": "KeepAlive.onLoad()",
+    "typ": "init"
+  },
+  {
+    "decimals": 0,
+    "label": "Interval to reset idle time",
+    "max": 60.0,
+    "min": 1.0,
+    "name": "Timeout_Number",
+    "slider": true,
+    "step_len": 1.0,
+    "suffix": "in minutes",
+    "typ": "number",
+    "value": 10
+  },
+  {
+    "disablable": true,
+    "enabled": true,
+    "functionCode": "KeepAlive.Toggle()",
+    "functionMode": 0,
+    "key": "Win+Shift+F",
+    "keyChange": true,
+    "label": "make some awesome stuff",
+    "mode": "ahk",
+    "multiple": true,
+    "name": "NoScreensaver_PauseResume",
+    "scope": [],
+    "scopeChange": true,
+    "scopeMode": 0,
+    "typ": "hotkey"
+  }
+]
