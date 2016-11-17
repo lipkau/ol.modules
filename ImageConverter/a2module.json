@@ -1,0 +1,20 @@
+[
+  {
+    "author": "Oliver Lipkau",
+    "date": "2016 11 14",
+    "description": "Because none existed before this temporary description was created for \"ImageConverter\". Change it to describe what it does with a couple of words.",
+    "typ": "nfo",
+    "url": "",
+    "version": "0.1"
+  },
+  {
+    "file": "ImageConverter.ahk",
+    "typ": "include"
+  },
+  {
+    "label": "Register ImageConverter in Context Menu",
+    "name": "ImageConverter_OpenFromContextMenu",
+    "typ": "check",
+    "value": true
+  }
+]
