@@ -6,22 +6,6 @@
 #include lib\ahklib\CNoficication.ahk
 
 /**
- * Fake Debug function while a2 doesn't offer a global one
- */
- WriteDebug(Title, InputObject = "", Delimiter = "`n", prefiex = "[a2] ")
-{
-    if (Settings.Debug.Enabled)
-    {
-        OutputDebug % prefix Title
-        if (InputObject)
-        {
-            Loop, Parse, InputObject, %Delimiter%
-                WriteDebug("    " A_LoopField)
-        }
-    }
-}
-
-/**
  * TODO:
  *   * Open from context menu
  *   * Upload
