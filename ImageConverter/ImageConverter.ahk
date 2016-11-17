@@ -3,6 +3,23 @@
 ; created: 2016 11 14
 
 #include lib\ahklib\CGUI\CGUI.ahk
+#include lib\ahklib\CNoficication.ahk
+
+/**
+ * Fake Debug function while a2 doesn't offer a global one
+ */
+ WriteDebug(Title, InputObject = "", Delimiter = "`n", prefiex = "[a2] ")
+{
+    if (Settings.Debug.Enabled)
+    {
+        OutputDebug % prefix Title
+        if (InputObject)
+        {
+            Loop, Parse, InputObject, %Delimiter%
+                WriteDebug("    " A_LoopField)
+        }
+    }
+}
 
 /**
  * TODO:
@@ -28,11 +45,13 @@ class CImageConverterAction
             for index, window in CImageConverter.Instances ;Find existing instance of window
                 if (window.ReuseWindow)
                 {
+                    WriteDebug("Reusing active ImageConverter window", window)
                     ImageConverter := window
                     break
                 }
         if (!ImageConverter)
             ImageConverter := new CImageConverter(this)
+        WriteDebug("Adding files to ImageConverter: ", Files)
         ImageConverter.AddFiles(Files)
         return 1
     }
@@ -129,6 +148,11 @@ class CImageConverter extends CGUI
         this.Show("Autosize")
     }
 
+    __Delete()
+    {
+        WatchDirectory("")
+    }
+
     PreClose()
     {
         ; Possibly delete old files
@@ -168,7 +192,7 @@ class CImageConverter extends CGUI
         Files := ToArray(Files)
         if (Files.MaxIndex() < 1)
         {
-            ; Notify("Image Converter Error", "No files selected!", 5, NotifyIcons.Error)
+            Notify("Image Converter Error", "No files selected!", 5, NotifyIcons.Error)
             return
         }
         Added := false
@@ -177,7 +201,7 @@ class CImageConverter extends CGUI
             SplitPath(file, Filename, "", Extension)
             if Extension not in BMP,DIB,RLE,JPG,JPEG,JPE,JFIF,GIF,TIF,TIFF,PNG
             {
-                ; Notify("Image Converter Error", file " is no supported image format!", 5, NotifyIcons.Error)
+                Notify("Image Converter Error", file " is no supported image format!", 5, NotifyIcons.Error)
                 continue
             }
             if (!this.Files.GetItemWithValue("SourceFile", file)) ;Append files which aren't yet in the list
@@ -199,7 +223,7 @@ class CImageConverter extends CGUI
             this.Show()
         }
         else
-            ; Notify("Image Converter Error", "No new files!", 5, NotifyIcons.Error)
+            Notify("Image Converter Error", "No new files!", 5, NotifyIcons.Error)
         return
     }
 
@@ -301,6 +325,7 @@ class CImageConverter extends CGUI
 
     Picture_Click()
     {
+        ; TODO
         ; ImageEditor := ExpandPathPlaceholders(Settings.Misc.DefaultImageEditor)
         ; if (FileExist(ImageEditor))
         ;     OpenFileWithProgram(this.Picture.Picture, ImageEditor)
@@ -319,8 +344,8 @@ class CImageConverter extends CGUI
             DeleteObject(hBitmap)
             Gdip_DisposeImage(pBitmap)
         }
-        ; else
-            ; Notify("Image Converter Error", "Failed to load image for copying!", 5, NotifyIcons.Error)
+        else
+            Notify("Image Converter Error", "Failed to load image for copying!", 5, NotifyIcons.Error)
     }
 
     btnUpload_Click()
@@ -399,10 +424,10 @@ class CImageConverter extends CGUI
             {
                 for index, image in FailedImages
                     Files .= (index := 1 ? "" : "`n") Image
-                ; Notify("Image Conversion failed!", "Failed to convert these files:`n" Files, 5, NotifyIcons.Error)
+                Notify("Image Conversion failed!", "Failed to convert these files:`n" Files, 5, NotifyIcons.Error)
             }
             else
-                ; Notify("Image Conversion completed!", "Successfully converted " ConvertedImages.MaxIndex() " files.", 5, NotifyIcons.Success)
+                Notify("Image Conversion completed!", "Successfully converted " ConvertedImages.MaxIndex() " files.", 5, NotifyIcons.Success)
             this.Close()
         }
     }
