@@ -13,15 +13,23 @@ class KeepAlive {
     /**
      * current state of the module
      *
-     * @type {[bool]}
+     * @type bool
      */
     static Active := false
+
+    /**
+     * Bound Method for the SetTimer
+     *
+     * @type BoundMethod
+     */
+    static timer
 
     /**
      * method to initialize the module
      */
     Init()
     {
+        this.timer := ObjBindMethod(this, "ResetTimeIdle")
         if (this._enabledByDefault)
             this.Activate()
     }
@@ -39,16 +47,16 @@ class KeepAlive {
 
     Activate()
     {
-        Func("KeepAlive_ResetTimeIdle").bind(this)
-        SetTimer %KeepAlive_ResetTimeIdle%, 2000
+        timer := this.timer
+        SetTimer % timer, 2000
         this.active := true
         Notify("KeepAlive activated", "", 2, NotifyIcons.Success)
     }
 
     Deactivate()
     {
-        Func("KeepAlive_ResetTimeIdle").bind(this)
-        SetTimer %KeepAlive_ResetTimeIdle%, 2000
+        timer := this.timer
+        SetTimer % timer, 2000
         this.active := false
         Notify("KeepAlive dectivated", "", 2, NotifyIcons.Success)
     }
@@ -59,11 +67,9 @@ class KeepAlive {
     Toggle()
     {
         if (this.active)
-        {
             this.Deactivate()
-        } else {
+        else
             this.Activate()
-        }
     }
 
     /**
@@ -87,9 +93,4 @@ class KeepAlive {
             return (NoScreensaver_EnabledByDefault == true) ? true : false
         }
     }
-}
-
-KeepAlive_ResetTimeIdle(obj)
-{
-    obj.ResetTimeIdle()
 }
