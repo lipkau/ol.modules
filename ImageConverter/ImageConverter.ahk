@@ -3,7 +3,7 @@
 ; created: 2016 11 14
 
 #include lib\ahklib\CGUI\CGUI.ahk
-#include lib\ahklib\CNoficication.ahk
+#include lib\ahklib\CNotification.ahk
 
 /**
  * TODO:
