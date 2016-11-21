@@ -1,0 +1,42 @@
+[
+  {
+    "author": "Lipkau",
+    "date": "2016 11 18",
+    "description": "Simulate the OSx scrolling behavior.",
+    "typ": "nfo",
+    "url": "https://github.com/lipkau/ol.modules/wiki/ScreenShotTool",
+    "version": "0.1"
+  },
+  {
+    "disablable": false,
+    "enabled": true,
+    "functionCode": "WheelDown",
+    "functionMode": 0,
+    "key": "Wheelup",
+    "keyChange": false,
+    "label": "",
+    "mode": "ahk",
+    "multiple": false,
+    "name": "InvertScrolling_HotkeyWheelUp",
+    "scope": [],
+    "scopeChange": true,
+    "scopeMode": 0,
+    "typ": "hotkey"
+  },
+  {
+    "disablable": false,
+    "enabled": true,
+    "functionCode": "WheelUp",
+    "functionMode": 0,
+    "key": "Wheeldown",
+    "keyChange": false,
+    "label": "",
+    "mode": "ahk",
+    "multiple": false,
+    "name": "InvertScrolling_HotkeyWheelDown",
+    "scope": [],
+    "scopeChange": true,
+    "scopeMode": 0,
+    "typ": "hotkey"
+  }
+]
