@@ -1,0 +1,72 @@
+[
+  {
+    "author": "Lipkau",
+    "date": "2016 11 21",
+    "description": "Because none existed before this temporary description was created for \"AutoCorrect\". Change it to describe what it does with a couple of words.",
+    "typ": "nfo",
+    "url": "",
+    "version": "0.1"
+  },
+  {
+    "file": "AutoCorrect.ahk",
+    "typ": "include"
+  },
+  {
+    "code": "AutoCorrect_Init()",
+    "typ": "init"
+  },
+  {
+    "children": [
+      {
+        "text": "Disabled by default to prevent unwanted corrections such as <code>IfEqual</code>-><code>Ifequal.</code>",
+        "typ": "label"
+      },
+      {
+        "label": "Enabled",
+        "name": "AutoCorrect_Hoty_Enabled",
+        "typ": "check",
+        "value": false
+      },
+      {
+        "label": "Letters, digits, and/or symbols\nthat are eligible for this type of correction",
+        "name": "AutoCorrect_Hoty_Keys",
+        "typ": "string",
+        "value": "abcdefghijklmnopqrstuvwxyz"
+      }
+    ],
+    "disablable": false,
+    "enabled": true,
+    "label": "AUto-COrrect TWo COnsecutive CApitals",
+    "name": "AutoCorrect_GroupHoty",
+    "typ": "group"
+  },
+  {
+    "children": [
+      {
+        "text": "Get the typo in clipboard and append the fix to to this script.",
+        "typ": "label"
+      },
+      {
+        "disablable": true,
+        "enabled": true,
+        "functionCode": "AutoCorrect_AddCustom()",
+        "functionMode": 0,
+        "key": "Win+F",
+        "keyChange": true,
+        "label": "Open dialog",
+        "mode": "ahk",
+        "multiple": true,
+        "name": "AutoCorrect_HotkeyAddCustom",
+        "scope": [],
+        "scopeChange": false,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      }
+    ],
+    "disablable": false,
+    "enabled": true,
+    "label": "Append with custom entries",
+    "name": "AutoCorrect_GroupBox2",
+    "typ": "group"
+  }
+]
