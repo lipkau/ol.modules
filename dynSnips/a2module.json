@@ -8,17 +8,17 @@
     "version": "0.1"
   },
   {
-    "file": "MI.ahk",
-    "typ": "include"
-  },
-  {
     "file": "dynSnip.ahk",
     "typ": "include"
   },
   {
+    "code": "dynSnips.Init()",
+    "typ": "init"
+  },
+  {
     "disablable": true,
     "enabled": true,
-    "functionCode": "showMenu()",
+    "functionCode": "dynSnips.ShowMenu()",
     "functionMode": 0,
     "functionURL": "Run, ",
     "key": "Win+Q",
@@ -39,7 +39,7 @@
     "name": "DynSnip_path",
     "save_mode": false,
     "typ": "path",
-    "value": "%AppData%",
+    "value": "%AppData%\\a2\\ol.modules\\dynSnips",
     "writable": true
   }
 ]
