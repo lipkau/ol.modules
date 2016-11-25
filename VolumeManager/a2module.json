@@ -1,0 +1,248 @@
+[
+  {
+    "author": "Lipkau",
+    "date": "2016 11 24",
+    "description": "Because none existed before this temporary description was created for \"VolumeManager\". Change it to describe what it does with a couple of words.",
+    "typ": "nfo",
+    "url": "",
+    "version": "0.1"
+  },
+  {
+    "file": "VolumeManager.ahk",
+    "typ": "include"
+  },
+  {
+    "code": "",
+    "typ": "init"
+  },
+  {
+    "children": [
+      {
+        "text": "This setting allows the mouse wheel to change the sound volume when the mouse is over the taskbar.",
+        "typ": "label"
+      },
+      {
+        "disablable": false,
+        "enabled": true,
+        "functionCode": "VolumeManager.execute(\"+\", \"Shell_TrayWnd\")",
+        "functionMode": 0,
+        "key": "Wheelup",
+        "keyChange": false,
+        "label": "Increase Volume",
+        "mode": "ahk",
+        "multiple": false,
+        "name": "VolumeManager_Hotkey0",
+        "scope": [
+          "ahk_class Shell_TrayWnd"
+        ],
+        "scopeChange": true,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      },
+      {
+        "disablable": false,
+        "enabled": true,
+        "functionCode": "VolumeManager.execute(\"-\", \"Shell_TrayWnd\")",
+        "functionMode": 0,
+        "key": "Wheeldown",
+        "keyChange": false,
+        "label": "Decrease Volume",
+        "mode": "ahk",
+        "multiple": false,
+        "name": "VolumeManager_Hotkey0",
+        "scope": [
+          "ahk_class Shell_TrayWnd"
+        ],
+        "scopeChange": true,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      }
+    ],
+    "disablable": true,
+    "enabled": true,
+    "label": "Manipulate Volume by hovering the Taskbar",
+    "name": "VolumeManager_GroupBox1",
+    "typ": "group"
+  },
+  {
+    "children": [
+      {
+        "text": "This setting allows a2 to show the sound volume in it's notification window when it is changed.",
+        "typ": "label"
+      },
+      {
+        "disablable": false,
+        "enabled": true,
+        "functionCode": "VolumeManager.execute(\"+\")",
+        "functionMode": 0,
+        "key": "Volume_Up",
+        "keyChange": false,
+        "label": "",
+        "mode": "ahk",
+        "multiple": false,
+        "name": "VolumeManager_Hotkey0",
+        "scope": [],
+        "scopeChange": true,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      },
+      {
+        "disablable": false,
+        "enabled": true,
+        "functionCode": "VolumeManager.execute(\"-\")",
+        "functionMode": 0,
+        "key": "Volume_Down",
+        "keyChange": false,
+        "label": "",
+        "mode": "ahk",
+        "multiple": false,
+        "name": "VolumeManager_Hotkey0",
+        "scope": [],
+        "scopeChange": true,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      },
+      {
+        "disablable": false,
+        "enabled": true,
+        "functionCode": "VolumeManager.ChangeVolume(\"toggle\")",
+        "functionMode": 0,
+        "key": "Volume_Mute",
+        "keyChange": false,
+        "label": "",
+        "mode": "ahk",
+        "multiple": false,
+        "name": "VolumeManager_Hotkey0",
+        "scope": [],
+        "scopeChange": true,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      }
+    ],
+    "disablable": true,
+    "enabled": true,
+    "label": "Show volume in notification window",
+    "name": "VolumeManager_GroupBox2",
+    "typ": "group"
+  },
+  {
+    "children": [
+      {
+        "text": "Custom key bindings to manipulate the sound volume.",
+        "typ": "label"
+      },
+      {
+        "disablable": true,
+        "enabled": false,
+        "functionCode": "VolumeManager.execute(\"+\")",
+        "functionMode": 0,
+        "key": "Win+F",
+        "keyChange": true,
+        "label": "Increase Volume",
+        "mode": "ahk",
+        "multiple": true,
+        "name": "VolumeManager_Hotkey0",
+        "scope": [],
+        "scopeChange": true,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      },
+      {
+        "disablable": true,
+        "enabled": false,
+        "functionCode": "VolumeManager.execute(\"-\")",
+        "functionMode": 0,
+        "key": "Win+F",
+        "keyChange": true,
+        "label": "Decrease Volume",
+        "mode": "ahk",
+        "multiple": true,
+        "name": "VolumeManager_Hotkey0",
+        "scope": [],
+        "scopeChange": true,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      },
+      {
+        "disablable": true,
+        "enabled": false,
+        "functionCode": "VolumeManager.execute(\"toggle\")",
+        "functionMode": 0,
+        "key": "Win+F",
+        "keyChange": true,
+        "label": "Toggle Mute",
+        "mode": "ahk",
+        "multiple": true,
+        "name": "VolumeManager_Hotkey0",
+        "scope": [],
+        "scopeChange": true,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      },
+      {
+        "disablable": true,
+        "enabled": false,
+        "functionCode": "VolumeManager.execute(\"mute\")",
+        "functionMode": 0,
+        "key": "Win+F",
+        "keyChange": true,
+        "label": "Mute",
+        "mode": "ahk",
+        "multiple": true,
+        "name": "VolumeManager_Hotkey0",
+        "scope": [],
+        "scopeChange": true,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      },
+      {
+        "disablable": true,
+        "enabled": false,
+        "functionCode": "VolumeManager.execute(\"unmute\")",
+        "functionMode": 0,
+        "key": "Win+F",
+        "keyChange": true,
+        "label": "UnMute",
+        "mode": "ahk",
+        "multiple": true,
+        "name": "VolumeManager_Hotkey0",
+        "scope": [],
+        "scopeChange": true,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      }
+    ],
+    "disablable": true,
+    "enabled": false,
+    "label": "Custome Binding",
+    "name": "VolumeManager_GroupBox4",
+    "typ": "group"
+  },
+  {
+    "children": [
+      {
+        "label": "Show the volume bar in the a2 notification window",
+        "name": "VolumeManager_ShowNotification",
+        "typ": "check",
+        "value": true
+      },
+      {
+        "decimals": 1,
+        "label": "Volume steps",
+        "max": 100.0,
+        "min": 1.0,
+        "name": "VolumeManager_StepSize",
+        "slider": true,
+        "step_len": 1.0,
+        "suffix": "",
+        "typ": "number",
+        "value": 5.0
+      }
+    ],
+    "disablable": false,
+    "enabled": true,
+    "label": "Settings",
+    "name": "VolumeManager_GroupBox3",
+    "typ": "group"
+  }
+]
