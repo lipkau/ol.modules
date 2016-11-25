@@ -1,0 +1,20 @@
+[
+  {
+    "author": "Oliver Lipkau",
+    "date": "2016 11 14",
+    "description": "Neat tool to manage Images. It allows you to convert between formats and much more.",
+    "typ": "nfo",
+    "url": "https://github.com/lipkau/ol.modules/wiki/ImageConverter",
+    "version": "0.1"
+  },
+  {
+    "file": "ImageConverter.ahk",
+    "typ": "include"
+  },
+  {
+    "label": "Register ImageConverter in Context Menu",
+    "name": "ImageConverter_OpenFromContextMenu",
+    "typ": "check",
+    "value": true
+  }
+]

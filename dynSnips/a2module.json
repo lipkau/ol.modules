@@ -1,0 +1,45 @@
+[
+  {
+    "author": "Oliver Lipkau",
+    "date": "2016 11 10",
+    "description": "Create Snippets to insert anywhere",
+    "typ": "nfo",
+    "url": "https://github.com/lipkau/ol.modules/wiki/dynSnips",
+    "version": "0.1"
+  },
+  {
+    "file": "dynSnip.ahk",
+    "typ": "include"
+  },
+  {
+    "code": "dynSnips.Init()",
+    "typ": "init"
+  },
+  {
+    "disablable": true,
+    "enabled": true,
+    "functionCode": "dynSnips.ShowMenu()",
+    "functionMode": 0,
+    "functionURL": "Run, ",
+    "key": "Win+Q",
+    "keyChange": true,
+    "label": "Open the DynSnip Menu",
+    "mode": "ahk",
+    "multiple": true,
+    "name": "showMenu_Hotkey",
+    "scope": [],
+    "scopeChange": true,
+    "scopeMode": 0,
+    "typ": "hotkey"
+  },
+  {
+    "browse_type": "0",
+    "file_types": "",
+    "label": "Snippet's path:",
+    "name": "DynSnip_path",
+    "save_mode": false,
+    "typ": "path",
+    "value": "%AppData%\\a2\\ol.modules\\dynSnips",
+    "writable": true
+  }
+]
