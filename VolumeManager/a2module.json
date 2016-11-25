@@ -2,9 +2,9 @@
   {
     "author": "Lipkau",
     "date": "2016 11 24",
-    "description": "Because none existed before this temporary description was created for \"VolumeManager\". Change it to describe what it does with a couple of words.",
+    "description": "Module for controlling the Window's volume in different ways.",
     "typ": "nfo",
-    "url": "",
+    "url": "https://github.com/lipkau/ol.modules/wiki/urlShortener",
     "version": "0.1"
   },
   {
