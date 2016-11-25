@@ -1,0 +1,48 @@
+[
+  {
+    "author": "Lipkau",
+    "date": "2016 11 25",
+    "description": "Show a dialog to rename or replace content in file names and/or file content in bulk.",
+    "typ": "nfo",
+    "url": "https://github.com/lipkau/ol.modules/wiki/urlShortener",
+    "version": "0.1"
+  },
+  {
+    "file": "ExplorerReplace.ahk",
+    "typ": "include"
+  },
+  {
+    "children": [
+      {
+        "disablable": true,
+        "enabled": true,
+        "functionCode": "ExplorerReplace.ShowGui()",
+        "functionMode": 0,
+        "key": "Ctrl+Shift+H",
+        "keyChange": true,
+        "label": "Open the Dialog Window",
+        "mode": "ahk",
+        "multiple": false,
+        "name": "ExplorerReplace_Hotkey0",
+        "scope": [
+          "ahk_class CabinetWClass",
+          "ahk_class ExploreWClass"
+        ],
+        "scopeChange": true,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      },
+      {
+        "label": "Register in ContextMenu",
+        "name": "ExplorerReplace_CheckBox0",
+        "typ": "check",
+        "value": true
+      }
+    ],
+    "disablable": false,
+    "enabled": true,
+    "label": "Settings",
+    "name": "ExplorerReplace_GroupBox1",
+    "typ": "group"
+  }
+]
