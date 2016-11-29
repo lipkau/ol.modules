@@ -1,0 +1,37 @@
+[
+  {
+    "author": "Lipkau",
+    "date": "2016 11 28",
+    "description": "Framework around the Windows Explorer. This brings some improvements to the Explorer itself and offers an API for other Modules.",
+    "typ": "nfo",
+    "url": "https://github.com/lipkau/ol.modules/wiki/ExplorerExtension",
+    "version": "0.1"
+  },
+  {
+    "file": "ExplorerExtension.ahk",
+    "typ": "include"
+  },
+  {
+    "file": "xml.ahk",
+    "typ": "include"
+  },
+  {
+    "code": "InitExplorerWindows()",
+    "typ": "init"
+  },
+  {
+    "children": [
+      {
+        "label": "F2 while renaming: Toggle between filename, extension and full name",
+        "name": "ExplorerExtension_EnhancedRenaming",
+        "typ": "check",
+        "value": true
+      }
+    ],
+    "disablable": false,
+    "enabled": true,
+    "label": "Settings",
+    "name": "ExplorerExtension_GroupBox1",
+    "typ": "group"
+  }
+]
