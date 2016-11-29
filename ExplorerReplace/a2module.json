@@ -16,6 +16,10 @@
     "typ": "init"
   },
   {
+    "text": "<i>This module is only available if the <b>ExplorerExtension</b> module is active.</i>",
+    "typ": "label"
+  },
+  {
     "children": [
       {
         "disablable": true,
