@@ -183,7 +183,7 @@
         "value": true
       },
       {
-        "text": "<i>This is only available if the <b>ImageConverter</b> module is active.</i>",
+        "text": "<i>This setting is only available if the <b>ImageConverter</b> module is active.</i>",
         "typ": "label"
       }
     ],
