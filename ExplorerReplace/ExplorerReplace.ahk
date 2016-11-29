@@ -2,6 +2,8 @@
 ; author: Lipkau
 ; created: 2016 11 25
 
+#include lib\ahklib\CNotification.ahk
+#include lib\ahklib\ExplorerHelpers.ahk
 
 /**
  * TODO:
@@ -11,6 +13,13 @@
 ExplorerReplace_Init()
 {
     global ExplorerReplace_RegisterInContextMenu
+
+    ; Test if ExplorerExtension was loaded
+    if (!(IsFunc("InitExplorerWindows"))) {
+        Notify("Missing dependency", "ExplorerReplace could not be loaded because of a missing dependency: ExplorerExtension.", 5, NotifyIcons.Error, "ExplorerReplace_DependencyHelp")
+        return
+    }
+
     if (ExplorerReplace_RegisterInContextMenu == true)
     {
         ; Register
@@ -19,12 +28,18 @@ ExplorerReplace_Init()
     }
 }
 
+ExplorerReplace_DependencyHelp()
+{
+    Run, https://github.com/lipkau/ol.modules/wiki/ExplorerExtension#MissingDependencies
+}
+
 class ExplorerReplace
 {
     ShowGui()
     {
         global ExplorerWindows
 
+        ; Do not show GUI if user is renaming a file
         if (this._IsRenaming())
             return 1
 
