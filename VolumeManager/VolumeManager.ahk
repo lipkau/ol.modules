@@ -3,6 +3,7 @@
 ; created: 2016 11 24
 
 #include lib\ahklib\VA.ahk
+#include lib\ahklib\CNotification.ahk
 
 /**
  * TODO:

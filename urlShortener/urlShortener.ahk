@@ -5,6 +5,7 @@
 #include lib\ahklib\jxon.ahk
 #include lib\ahklib\base64.ahk
 #include lib\ahklib\HTTPRequest.ahk
+#include lib\ahklib\CNotification.ahk
 
 /**
  * TODO:
