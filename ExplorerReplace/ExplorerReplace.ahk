@@ -8,21 +8,34 @@
  *     * Callback from Context Menu
  */
 
+ExplorerReplace_Init()
+{
+    global ExplorerReplace_RegisterInContextMenu
+    if (ExplorerReplace_RegisterInContextMenu == true)
+    {
+        ; Register
+    } else {
+        ; Unregister
+    }
+}
+
 class ExplorerReplace
 {
-    static _openDiag := ""
-
     ShowGui()
     {
-        tt("lorem")
-        if (this._openDiag.GUINum)
-            Gui, % this._openDiag.GUINum ":Show"
+        global ExplorerWindows
+
+        if (this._IsRenaming())
+            return 1
+
+        if (IsObject(ExplorerWindows.GetItemWithValue("hwnd", WinActive("ahk_group ExplorerGroup")).ReplaceDialog))
+            Gui, % ExplorerWindows.GetItemWithValue("hwnd", WinActive("ahk_group ExplorerGroup")).ReplaceDialog.GUINum ":Show"
         else
         {
             ReplaceDialog := new CReplaceDialog(this)
             if (IsObject(ReplaceDialog))
             {
-                this._openDiag := ReplaceDialog
+                ExplorerWindows.GetItemWithValue("hwnd", ReplaceDialog.Parent).ReplaceDialog := ReplaceDialog
                 return 1
             }
             return 0
@@ -74,15 +87,13 @@ class ExplorerReplace
 
 Class CReplaceDialog
 {
-    static Action
-
     __New(Action)
     {
+        global ExplorerWindows
         Critical, Off
-        this.Action := Action
         if (!this.Parent := WinActive("ahk_group ExplorerGroup"))
             return 0
-        if (IsObject(Action._openDiag))
+        if (IsObject(ExplorerWindows.GetItemWithValue("hwnd", this.Parent).ReplaceDialog))
             return 0
         this.GUINum:=GetFreeGUINum(10)
         if (!this.GUINum)
@@ -90,7 +101,7 @@ Class CReplaceDialog
         Gui, % this.GUINum ":Default"
         Gui, % this.GUINum ":Add",Text, x10 y10, Search in:
         Gui, % this.GUINum ":Add",Radio, x77 y10 hwndhFilenames gExplorerReplaceDialogFilenames Checked, File names
-        Gui, % this.GUINum ":Add",Radio, x150 y10 hwndhFiles gExplorerReplaceDialogFiles, Files
+        Gui, % this.GUINum ":Add",Radio, x160 y10 hwndhFiles gExplorerReplaceDialogFiles, Files
         Gui, % this.GUINum ":Add",Text, x10 y36, Search:
         Gui, % this.GUINum ":Add",Edit, x66 y35 w346 hwndhReplace
         Gui, % this.GUINum ":Add",Text, x10 y62, Replace:
@@ -254,7 +265,7 @@ Class CReplaceDialog
 
         this.hReplaceButton := hReplaceButton
         this.hCancel := hCancel
-        Gui, % this.GUINum ":-Resize -MaximizeBox -MinimizeBox +ToolWindow +LastFound +LabelExplorerReplaceDialog"
+        Gui, % this.GUINum ":-Resize -MaximizeBox -MinimizeBox +LastFound +LabelExplorerReplaceDialog"
 
         Gui, % this.GUINum ":Show", AutoSize, % (Action.View = "Files" ? "Replace in files" : "Replace filenames")
         this.hWnd := WinExist()
@@ -264,7 +275,7 @@ Class CReplaceDialog
             this.GuiEvent("ExplorerReplaceDialogFiles")
         }
         ControlFocus , , ahk_id %hReplace%
-        ; AttachToolWindow(this.Parent, this.GUINum, True)
+        AttachToolWindow(this.Parent, this.GUINum, True)
     }
     __Delete()
     {
@@ -274,6 +285,7 @@ Class CReplaceDialog
     ; Performs a search and shows the results in the preview listview
     Search()
     {
+        global ExplorerWindows
         this.Filenames := ControlGet("Checked","","","ahk_id " this.hFilenames)
         this.SearchString := ControlGetText("","ahk_id " this.hReplace)
         this.ReplaceString := ControlGetText("","ahk_id " this.hWith)
@@ -328,7 +340,7 @@ Class CReplaceDialog
         {
             this.DirectoryTree := Array()
             this.DirectoryTree.Directory := true
-            ; BasePath := ExplorerWindows.GetItemWithValue("hwnd", this.Parent).Path
+            BasePath := ExplorerWindows.GetItemWithValue("hwnd", this.Parent).Path
             SplitPath, BasePath,Name,Path
             this.BasePath := BasePath
             this.DirectoryTree.Path := Path
@@ -354,7 +366,7 @@ Class CReplaceDialog
         }
         else
         {
-            ; this.BasePath := ExplorerWindows.GetItemWithValue("hwnd", this.Parent).Path
+            this.BasePath := ExplorerWindows.GetItemWithValue("hwnd", this.Parent).Path
             this.FileContentSearch()
             if (!this.Stop)
             {
@@ -990,6 +1002,7 @@ Class CReplaceDialog
     }
     Replace()
     {
+        global ExplorerWindows
         WinSetTitle, % "ahk_id " this.hWnd,,Working...,
         if (this.Filenames)
             this.PerformFileNameReplace(this.DirectoryTree, AppendPaths(this.DirectoryTree.Path, this.DirectoryTree.Name))
@@ -1006,8 +1019,7 @@ Class CReplaceDialog
             ControlSetText,, Cancel, % "ahk_id " this.hCancel
             Control, Disable,,, % "ahk_id " this.hReplaceButton
         }
-        this.Action._openDiag := ""
-        ; ExplorerWindows.GetItemWithValue("hwnd", this.Parent).Remove("ReplaceDialog")
+        ExplorerWindows.GetItemWithValue("hwnd", this.Parent).Remove("ReplaceDialog")
     }
 }
 ExplorerReplaceDialogFiles:
@@ -1078,207 +1090,3 @@ return
 ExplorerReplaceDialogRegEx:
 run http://www.autohotkey.com/docs/misc/RegEx-QuickRef.htm
 return
-
-
-; Gets focused control in XP to prevent blocking double clicks like with ControlGetFocus
-XPGetFocussed()
-{
-  WinGet ctrlList, ControlList, A
-  ctrlHwnd:=GetFocusedControl()
-  ; Built an array indexing the control names by their hwnd
-  Loop Parse, ctrlList, `n
-  {
-    ControlGet hwnd, Hwnd, , %A_LoopField%, A
-    hwnd += 0   ; Convert from hexa to decimal
-    if (hwnd=ctrlHwnd)
-      return A_LoopField
-  }
-}
-
-; This script retrieves the ahk_id (HWND) of the active window's focused control.
-; This script requires Windows 98+ or NT 4.0 SP3+.
-/*
-typedef struct tagGUITHREADINFO {
-  DWORD cbSize;
-  DWORD flags;
-  HWND  hwndActive;
-  HWND  hwndFocus;
-  HWND  hwndCapture;
-  HWND  hwndMenuOwner;
-  HWND  hwndMoveSize;
-  HWND  hwndCaret;
-  RECT  rcCaret;
-} GUITHREADINFO, *PGUITHREADINFO;
-*/
-GetFocusedControl()
-{
-   guiThreadInfoSize := 8 + 6 * A_PtrSize + 16
-   VarSetCapacity(guiThreadInfo, guiThreadInfoSize, 0)
-   NumPut(GuiThreadInfoSize, GuiThreadInfo, 0)
-   ; DllCall("RtlFillMemory" , "PTR", &guiThreadInfo, "UInt", 1 , "UChar", guiThreadInfoSize)   ; Below 0xFF, one call only is needed
-   if (DllCall("GetGUIThreadInfo" , "UInt", 0   ; Foreground thread
-         , "PTR", &guiThreadInfo) = 0)
-   {
-      ErrorLevel := A_LastError   ; Failure
-      Return 0
-   }
-   focusedHwnd := NumGet(guiThreadInfo,8+A_PtrSize, "Ptr") ; *(addr + 12) + (*(addr + 13) << 8) +  (*(addr + 14) << 16) + (*(addr + 15) << 24)
-   Return focusedHwnd
-}
-
-; checks if a point is in a rectangle
-IsInArea(px, py, x, y, w, h)
-{
-    return (px > x && py > y && px < x + w && py < y + h)
-}
-
-IsDialog(window=0,ListViewSelected = False)
-{
-    result:=0
-    if (window)
-        window:="ahk_id " window
-    else
-        window:="A"
-    if (WinGetClass(window)="#32770")
-    {
-        ; Check for new FileOpen dialog
-        ControlGet, hwnd, Hwnd , , DirectUIHWND3, %window%
-        if (hwnd)
-        {
-            ControlGet, hwnd, Hwnd , , SysTreeView321, %window%
-            if (hwnd)
-            {
-                ControlGet, hwnd, Hwnd , , Edit1, %window%
-                if (hwnd)
-                {
-                    ControlGet, hwnd, Hwnd , , Button2, %window%
-                    if (hwnd)
-                    {
-                        ControlGet, hwnd, Hwnd , , ComboBox2, %window%
-                        if (hwnd)
-                        {
-                        ControlGet, hwnd, Hwnd , , ToolBarWindow323, %window%
-                        if (hwnd)
-                            result:=(!ListViewSelected||IsControlActive("DirectUIHWND2")||IsControlActive("SysTreeView321"))
-                        }
-                    }
-                }
-            }
-        }
-        ; Check for old FileOpen dialog
-        if (!result)
-        {
-            ControlGet, hwnd, Hwnd , , ToolbarWindow321, %window%
-            if (hwnd)
-            {
-                ControlGet, hwnd, Hwnd , , SysListView321, %window%
-                if (hwnd)
-                {
-                    ControlGet, hwnd, Hwnd , , ComboBox3, %window%
-                    if (hwnd)
-                    {
-                        ControlGet, hwnd, Hwnd , , Button3, %window%
-                        if (hwnd)
-                        {
-                            ControlGet, hwnd, Hwnd , , SysHeader321 , %window%
-                            if (hwnd)
-                                result:=(!ListViewSelected||IsControlActive("DirectUIHWND2")||IsControlActive("SysTreeView321")) ? 2 : 0
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return result
-}
-
-; Checks if a specific control class is active. Matches by start of ClassNN.
-IsControlActive(controlclass)
-{
-    if (WinVer >= WIN_7)
-        ControlGetFocus active, A
-    else
-        active := XPGetFocussed()
-    if (InStr(active, controlclass))
-        return true
-    return false
-}
-; Adds a tooltip to a control.
-AddToolTip(con, text, Modify = 0)
-{
-    Static TThwnd,GuiHwnd
-    l_DetectHiddenWindows := A_DetectHiddenWindows
-    if (!TThwnd)
-    {
-        Gui, +LastFound
-        GuiHwnd := WinExist()
-        TThwnd := CreateTooltipControl(GuiHwnd)
-        Varsetcapacity(TInfo, 6 * 4 + 6 * A_PtrSize, 0)
-        Numput(6 * 4 + 6 * A_PtrSize, TInfo, "UInt")
-        Numput(1 | 16, TInfo, 4, "UInt")
-        Numput(GuiHwnd, TInfo, 8, "PTR")
-        Numput(GuiHwnd, TInfo, 8 + A_PtrSize, "PTR")
-        ; Numput(&text,TInfo,36)
-        Detecthiddenwindows, on
-        Sendmessage, 1028, 0, &TInfo, , ahk_id %TThwnd%
-        SendMessage, 1048, 0, 300, , ahk_id %TThwnd%
-    }
-    Varsetcapacity(TInfo, 6 * 4 + 6 * A_PtrSize, 0)
-    Numput(6 * 4 + 6 * A_PtrSize, TInfo, "UInt")
-    Numput(1 | 16, TInfo, 4, "UInt")
-    Numput(GuiHwnd, TInfo, 8, "PTR")
-    Numput(con, TInfo, 8 + A_PtrSize, "PTR")
-    VarSetCapacity(ANSItext, StrPut(text, ""))
-    StrPut(text, &ANSItext, "")
-    Numput(&ANSIText, TInfo, 6 * 4 + 3 * A_PtrSize, "PTR")
-
-    Detecthiddenwindows, on
-    if (Modify)
-        SendMessage, 1036, 0, &TInfo, , ahk_id %TThwnd%
-    else
-    {
-        Sendmessage, 1028, 0, &TInfo, , ahk_id %TThwnd%
-        SendMessage, 1048, 0, 300, , ahk_id %TThwnd%
-    }
-    DetectHiddenWindows %l_DetectHiddenWindows%
-}
-; Append two paths together and treat possibly double or missing backslashes
-AppendPaths(BasePath, RelativePath)
-{
-    if (!BasePath)
-        return RelativePath
-    if (!RelativePath)
-        return BasePath
-    return StringTrimLeft(BasePath, "\") "\" StringTrimLeft(RelativePath, "\")
-}
-
-; Gets ClassNN from hwnd
-HWNDToClassNN(hwnd)
-{
-    win := DllCall("GetParent", "PTR", hwnd, "PTR")
-    WinGet ctrlList, ControlList, ahk_id %win%
-    ; Built an array indexing the control names by their hwnd
-    Loop Parse, ctrlList, `n
-    {
-        ControlGet hwnd1, Hwnd, , %A_LoopField%, ahk_id %win%
-        if (hwnd1=hwnd)
-            return A_LoopField
-    }
-}
-CreateTooltipControl(hwind)
-{
-    Ret := DllCall("CreateWindowEx"
-    ,"Uint", 0
-    ,"Str", "TOOLTIPS_CLASS32"
-    ,"PTR", 0
-    ,"Uint", 2147483648 | 3
-    ,"Uint", -2147483648
-    ,"Uint", -2147483648
-    ,"Uint", -2147483648
-    ,"Uint", -2147483648
-    ,"PTR", hwind
-    ,"PTR", 0
-    ,"PTR", 0
-    ,"PTR", 0, "PTR")
-    return Ret
-}

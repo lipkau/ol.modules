@@ -4,12 +4,16 @@
     "date": "2016 11 25",
     "description": "Show a dialog to rename or replace content in file names and/or file content in bulk.",
     "typ": "nfo",
-    "url": "https://github.com/lipkau/ol.modules/wiki/urlShortener",
+    "url": "https://github.com/lipkau/ol.modules/wiki/ExplorerReplace",
     "version": "0.1"
   },
   {
     "file": "ExplorerReplace.ahk",
     "typ": "include"
+  },
+  {
+    "code": "ExplorerReplace_Init()",
+    "typ": "init"
   },
   {
     "children": [
@@ -34,7 +38,7 @@
       },
       {
         "label": "Register in ContextMenu",
-        "name": "ExplorerReplace_CheckBox0",
+        "name": "ExplorerReplace_RegisterInContextMenu",
         "typ": "check",
         "value": true
       }
