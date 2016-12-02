@@ -25,9 +25,12 @@ class SetTimer
     {
         if ((method == "overClock" && this._IsMouseOverClock()) OR (method == "show"))
         {
-            timerType := this.Prompt("timerType")
-            timerDuration := this.Prompt("duration")
-            timerAction := this.Prompt(timerType, timerDuration)
+            if (timerType := this.Prompt("timerType") == -1)
+                return
+            if (timerDuration := this.Prompt("duration") == -1)
+                return
+            if (timerAction := this.Prompt(timerType, timerDuration) == -1)
+                return
 
             Settings.Timer.Insert(new CTimer(timerType, timerDuration, timerAction))
             this.timer := Settings.Timer[Settings.Timer.MaxIndex()]
