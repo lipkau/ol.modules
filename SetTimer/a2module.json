@@ -1,0 +1,63 @@
+[
+  {
+    "author": "Lipkau",
+    "date": "2016 12 1",
+    "description": "Create a custome timer that can show you a message, start a program or shut down your computer for you.",
+    "typ": "nfo",
+    "url": "https://github.com/lipkau/ol.modules/wiki/SetTimer",
+    "version": "0.1"
+  },
+  {
+    "file": "SetTimer.ahk",
+    "typ": "include"
+  },
+  {
+    "code": "",
+    "typ": "init"
+  },
+  {
+    "text": "",
+    "typ": "label"
+  },
+  {
+    "children": [
+      {
+        "disablable": true,
+        "enabled": true,
+        "functionCode": "SetTimer.Execute(\"show\")",
+        "functionMode": 0,
+        "key": "Ctrl+Win+T",
+        "keyChange": true,
+        "label": "Open dialog",
+        "mode": "ahk",
+        "multiple": true,
+        "name": "SetTimer_Hotkey0",
+        "scope": [],
+        "scopeChange": true,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      },
+      {
+        "disablable": true,
+        "enabled": true,
+        "functionCode": "SetTimer.Execute(\"overClock\")",
+        "functionMode": 0,
+        "key": "Mbutton",
+        "keyChange": true,
+        "label": "Middle Mouse click on the clock",
+        "mode": "ahk",
+        "multiple": true,
+        "name": "SetTimer_Hotkey0",
+        "scope": [],
+        "scopeChange": true,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      }
+    ],
+    "disablable": false,
+    "enabled": true,
+    "label": "Hotkeys",
+    "name": "SetTimer_GroupBox1",
+    "typ": "group"
+  }
+]
