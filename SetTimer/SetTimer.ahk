@@ -16,11 +16,20 @@ class SetTimer
     static moduleName   := "SetTimer"
     static moduleHelp   := "https://github.com/lipkau/ol.modules/wiki/SetTimer"
 
+    /**
+     * Instanciate Module on statup
+     */
     Init()
     {
+        ; Inject module into global Settings
         Settings.Timer := {}
     }
 
+    /**
+     * Entrance point for hotkeys
+     *
+     * @return void
+     */
     Execute(method)
     {
         if ((method == "overClock" && this._IsMouseOverClock()) OR (method == "show"))
@@ -40,10 +49,17 @@ class SetTimer
             this.timer.Title := this.moduleName
             this.timer.Text  := "Lorem ipsum dolor sum"
             this.timer.ShowTimer()
+            this.timer.Start()
         }
     }
 
-    Prompt(arg, duration = false)
+    /**
+     * Open a Prompt to ask the user for conditional input
+     *
+     * @param   string  arg    contains the condition to decide what to prompt
+     * @return  string
+     */
+    Prompt(arg)
     {
         if (arg == "timerType") {
             Prompt.Title := this.moduleName
@@ -75,6 +91,11 @@ class SetTimer
         }
     }
 
+    /**
+     * Test if mouse is currently over the Clock in the SysTray
+     *
+     * @return  bool
+     */
     _IsMouseOverClock()
     {
         CoordMode, Mouse, Screen
@@ -87,19 +108,42 @@ class SetTimer
     }
 }
 
-class CTimer
+class CTimer extends CRichObject
 {
     static Time := ""
     static Text := ""
     static ShowProgress := 1
     static Restart := 1
+    static AddControl := Func("AddControl")
+    static SubmitControls := Func("SubmitControls")
+    static SelectFile := Func("SelectFile")
+    static Browse := Func("Browse")
 
+    /**
+     * Constructor
+     *
+     * @param  string   type       Name of the Type of string -> this defines what to do with the action
+     * @param  string   duration   Duration of the Timer (HH:MM:SS)
+     * @param  string   action     Action for the timer to perform when it elapses
+     * @return void
+     */
     __New(type, duration, action)
     {
         if (!this.tmpGUINum)
             this.tmpGUINum := GetFreeGuiNum(10)
+        this.Action := action
+        this.Type := type
+        this.tmptime := duration
+        timeArray := StrSplit(this.tmptime, ":")
+        hours := timeArray[1]
+        minutes := timeArray[2]
+        seconds := timeArray[3]
+        this.Time := (hours * 3600 + minutes * 60 + seconds) * 1000
     }
 
+    /**
+     * Guilds a GUI for a Timer
+     */
     ShowTimer()
     {
         GUINum := this.tmpGUINum
@@ -109,26 +153,20 @@ class CTimer
         GUI, %GUINum%:Add, Button, hwndStartPause gTimer_StartPause y4 w100, Pause
         GUI, %GUINum%:Add, Button, hwndStop gTimer_Stop y+4 w100, Stop
         GUI, %GUINum%:Add, Button, hwndReset gTimer_Reset y+4 w100, Reset
-        GUI, %GUINum%:+AlwaysOnTop -SysMenu -Resize
+        GUI, %GUINum%:+AlwaysOnTop -MaximizeBox -Resize
         Sleep 10
-        GUI, %GUINum%:Show,, % this.Title
+        GUI, %GUINum%:Show, AutoSize, % this.Title
         this.tmpProgress := Progress
         this.tmpText := Text
         this.tmpStartPause := StartPause
         this.tmpStop := Stop
         this.tmpResetHandle := Reset
         this.tmpEventName := EventName
-        SetTimer, UpdateTimerProgress, 1000
     }
 
-    StartPause()
-    {
-        if (this.tmpIsPaused)
-            this.Start()
-        else
-            this.Pause()
-    }
-
+/**
+ * Starts a Timer
+ */
     Start()
     {
         if (!this.tmpIsPaused)
@@ -150,8 +188,16 @@ class CTimer
             if (!this.tmpReset)
                 ControlSetText,,Pause, ahk_id %hwndStartPause%
         }
+        UpdateTimerProgress := Func("UpdateTimerProgress")
+        SetTimer, UpdateTimerProgress, 1000
     }
 
+    /**
+     * Pause a Timer
+     * This pauses a Timer and changes the UI accordingly
+     *
+     * @return void
+     */
     Pause()
     {
         if (this.ShowProgress && this.tmpGUINum)
@@ -162,14 +208,42 @@ class CTimer
         }
         if (!this.tmpIsPaused)
             this.tmpIsPaused := A_TickCount - this.tmpStart
+        UpdateTimerProgress := Func("UpdateTimerProgress")
+        SetTimer, UpdateTimerProgress, Off
     }
 
-    Stop(Event)
+    /**
+     * Toggles the Timer
+     *
+     * @return void
+     */
+    StartPause()
     {
-        Event.SetEnabled(false)
-        Event.Trigger.Disable(Event)
+        if (this.tmpIsPaused)
+            this.Start()
+        else
+            this.Pause()
     }
 
+    /**
+     * Stop a Timer
+     * Stops the Timer (that runs every second) and closes the Timer Object
+     *
+     * @return void
+     */
+    Stop()
+    {
+        this.Disable()
+        UpdateTimerProgress := Func("UpdateTimerProgress")
+        SetTimer, UpdateTimerProgress, Off
+    }
+
+    /**
+     * Reset a Timer
+     * Reset a timer to the original value stored in this.Time
+     *
+     * @return void
+     */
     Reset()
     {
         this.tmpReset := 1
@@ -178,58 +252,108 @@ class CTimer
         this.tmpStart := A_TickCount
         this.tmpStartNice := A_Now
     }
+
+    /**
+     * Disable a Timer
+     * This is done when the Timer runs out, or stopped.
+     *
+     * @return void
+     *
+     * TODO:
+     *     * include in Close routing of GUI
+     */
+    Disable()
+    {
+        this.tmpStart := ""
+        this.tmpStartNice := ""
+        this.tmpIsPaused := 0
+        TimerObj := TimerEventFromGUINumber(this.tmpGUINum)
+        if (this.ShowProgress)
+        {
+            GUINum := this.tmpGUINum
+            if (GUINum)
+            {
+                this.Remove("tmpGUINum")
+                this.Remove("tmpProgress")
+                this.Remove("tmpText")
+                this.Remove("tmpEventName")
+                GUI, %GUINum%:Destroy
+            }
+        }
+        ; TODO: delete from Settings?
+        ; Settings.Timer
+        ; DebugObject("TimerObj")
+    }
+
+    /**
+     * Check if Timer is run out
+     * This is called once per second
+     *
+     * @return bool:false    if is not run out
+     * @return void          if is run out
+     */
+    ; Called every second to check if time has run out yet
+    IsRunOut()
+    {
+        if (this.tmpStart && !this.tmpIsPaused && A_TickCount > (this.tmpStart + this.Time))
+        {
+            if (this.Type == "Message timer") {
+                ; TODO: send message
+                Msgbox % this.Action
+            } else if (this.Type == "Shutdown timer") {
+                ; TODO: shut down pc
+            } else if (this.Type == "Run program timer") {
+                ; TODO: run program
+                run, % this.Action
+            }
+            this.Disable()
+        }
+        return false
+    }
 }
 
 Timer_StartPause:
-TimerEventFromGUINumber().StartPause()
+    TimerEventFromGUINumber().StartPause()
 return
 Timer_Stop:
-TimerEventFromGUINumber().Stop(TimerEventFromGUINumber())
+    TimerEventFromGUINumber().Stop(TimerEventFromGUINumber())
 return
 Timer_Reset:
-TimerEventFromGUINumber().Reset()
+    TimerEventFromGUINumber().Reset()
 return
-TimerEventFromGUINumber()
+TimerEventFromGUINumber(guiNum = "")
 {
+    thisGUI := guiNum ? guiNum : A_GUI
     for index, Timer in Settings.Timer
-        if (Timer.Is(CTimer) && Timer.tmpGUINum = A_GUI)
+        if (Timer.Is(CTimer) && Timer.tmpGUINum = thisGUI)
             return Timer
     return 0
 }
 
-; Called once a second to update the progress on all timer windows and trigger the timers whose time has come
-UpdateTimerProgress:
-UpdateTimerProgress()
-EventSystem.OnTrigger(new CTimerTrigger())
-return
-
 UpdateTimerProgress()
 {
-    for index, Event in EventSystem.Events
-        GoSub UpdateTimerProgress_InnerLoop
-    for index, Event in EventSystem.TemporaryEvents
+    for index, Timer in Settings.Timer
         GoSub UpdateTimerProgress_InnerLoop
     return
 
     UpdateTimerProgress_InnerLoop:
-    if (Event.Trigger.Is(CTimerTrigger)) ;Update all timers
-    {
-        timer := Event.Trigger
-        if (Event.Enabled && (!timer.tmpIsPaused || timer.tmpReset) && timer.ShowProgress && timer.tmpGUINum)
+        if (Timer.Is(CTimer))
         {
-            GUINum := timer.tmpGUINum
-            progress := Round(100 - (A_TickCount - timer.tmpStart)/timer.Time * 100)
-            hours := max(Floor((timer.Time - (A_TickCount - timer.tmpStart)) / 1000 / 3600),0)
-            minutes := max(Floor(((timer.Time - (A_TickCount - timer.tmpStart)) / 1000 - hours * 3600)/60),0)
-            seconds := max(Floor(((timer.Time - (A_TickCount - timer.tmpStart)) / 1000 - hours * 3600 - minutes * 60))+1,0)
-            Time := "Time left: " (strLen(hours) = 1 ? "0" hours : hours) ":" (strLen(minutes) = 1 ? "0" minutes : minutes) ":" (strLen(seconds) = 1 ? "0" seconds : seconds)
-            hwndProgress := timer.tmpProgress
-            SendMessage, 0x402, progress,0,, ahk_id %hwndProgress%
-            hwndtext := timer.tmpText
-            ControlSetText,,%Time%, ahk_id %hwndtext%
-            hwndEventName := timer.tmpEventName
-            timer.tmpReset := 0
+            if ((!timer.tmpIsPaused || timer.tmpReset) && timer.ShowProgress && timer.tmpGUINum)
+            {
+                GUINum := timer.tmpGUINum
+                progress := Round(100 - (A_TickCount - timer.tmpStart)/timer.Time * 100)
+                hours := max(Floor((timer.Time - (A_TickCount - timer.tmpStart)) / 1000 / 3600), 0)
+                minutes := max(Floor(((timer.Time - (A_TickCount - timer.tmpStart)) / 1000 - hours * 3600)/60), 0)
+                seconds := max(Floor(((timer.Time - (A_TickCount - timer.tmpStart)) / 1000 - hours * 3600 - minutes * 60))+1, 0)
+                Time := "Time left: " (strLen(hours) = 1 ? "0" hours : hours) ":" (strLen(minutes) = 1 ? "0" minutes : minutes) ":" (strLen(seconds) = 1 ? "0" seconds : seconds)
+                hwndProgress := timer.tmpProgress
+                SendMessage, 0x402, progress, 0, , ahk_id %hwndProgress%
+                hwndtext := timer.tmpText
+                ControlSetText, , %Time%, ahk_id %hwndtext%
+                timer.tmpReset := 0
+                timer.IsRunOut()
+            }
         }
-    }
     return
 }
