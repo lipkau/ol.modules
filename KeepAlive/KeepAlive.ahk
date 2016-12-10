@@ -1,5 +1,5 @@
 ; KeepAlive - KeepAlive.ahk
-; author: Oliver Lipkau
+; author: Oliver Lipkau <https://github.com/lipkau>
 ; created: 2016 11 13
 
 #include lib\ahklib\CNotification.ahk
@@ -10,6 +10,13 @@
  */
 
 class KeepAlive {
+    /**
+     * Module properties
+     */
+    static moduleBundle := "ol.modules"
+    static moduleName   := "KeepAlive"
+    static moduleHelp   := "https://github.com/lipkau/ol.modules/wiki/KeepAlive"
+
     /**
      * current state of the module
      *
@@ -29,6 +36,8 @@ class KeepAlive {
      */
     Init()
     {
+        WriteDebug("Initialized module", "", "i", this.moduleName)
+
         this.timer := ObjBindMethod(this, "ResetTimeIdle")
         if (this._enabledByDefault)
             this.Activate()
@@ -40,13 +49,17 @@ class KeepAlive {
     ResetTimeIdle()
     {
         if (A_TimeIdle > this.timeout) {
-            WriteDebug("KeepAlive: set idle time")
+            WriteDebug("Reset A_TimeIdle", "", "i", this.moduleName)
+
             SendInput {ScrollLock}{ScrollLock}
         }
     }
 
     Activate()
     {
+        WriteDebug("Activating module", "", "i", this.moduleName)
+        WriteDebug("Using timeout of:", this.timeout, "debug", this.moduleName)
+
         timer := this.timer
         SetTimer % timer, 2000
         this.active := true
@@ -55,6 +68,8 @@ class KeepAlive {
 
     Deactivate()
     {
+        WriteDebug("Deactivating module", "", "i", this.moduleName)
+
         timer := this.timer
         SetTimer % timer, 2000
         this.active := false
