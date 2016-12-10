@@ -2,6 +2,8 @@
 ; author: Oliver Lipkau <https://github.com/lipkau>
 ; created: 2016 11 21
 
+#include lib\ahklib\CNotification.ahk
+
 ; Author: Jim Biancolo and Wikipedia's Lists of Common Misspellings
 ; Source: AHK Help file
 
@@ -133,6 +135,8 @@ AutoCorrect_AddCustom()
     ; Otherwise, add the hotstring and reload the script:
     WriteDebug("Storing custom element", Hotstring, "debug", "AutoCorrect")
     FileAppend, `n%Hotstring%, %thisFile%  ; Put a `n at the beginning in case file lacks a blank line at its end.
+    Notify(AutoCorrect, Added new custom correction, 3, NotifyIcons.Success)
+    sleep 500
     if (AutoCorrect_AutoReload)
         Reload
     return
