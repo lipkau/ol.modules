@@ -36,7 +36,7 @@ class KeepAlive {
      */
     Init()
     {
-        WriteDebug("Initialized module", "", "i", this.moduleName)
+        WriteDebug("Initializing module", "", "i", this.moduleName)
 
         this.timer := ObjBindMethod(this, "ResetTimeIdle")
         if (this._enabledByDefault)
