@@ -1,5 +1,5 @@
 ; AutoCorrect - AutoCorrect.ahk
-; author: Lipkau
+; author: Oliver Lipkau <https://github.com/lipkau>
 ; created: 2016 11 21
 
 ; Author: Jim Biancolo and Wikipedia's Lists of Common Misspellings
@@ -72,6 +72,9 @@
 AutoCorrect_Init()
 {
     global AutoCorrect_Hoty_Enabled, AutoCorrect_Hoty_Keys
+
+    WriteDebug("Initializing module", "", "i", "AutoCorrect")
+
     if (AutoCorrect_Hoty_Enabled == true)
     {
         keys := AutoCorrect_Hoty_Keys
@@ -94,9 +97,11 @@ Return
 ;------------------------------------------------------------------------------
 AutoCorrect_AddCustom()
 {
-    global a2Dir, a2_modules
+    global AutoCorrect_AutoReload
 
-    thisFile := a2Dir "\" a2_modules "\ol.modules\AutoCorrect\AutoCorrect.ahk"
+    WriteDebug("Adding custom element", "", "i", "AutoCorrect")
+
+    thisFile := a2.Path "\" a2.Modules "\ol.modules\AutoCorrect\AutoCorrect.ahk"
     tt(thisFile)
 
     ; Get the selected text. The clipboard is used instead of "ControlGet Selected"
@@ -126,11 +131,10 @@ AutoCorrect_AddCustom()
     if ErrorLevel <> 0  ; The user pressed Cancel.
         return
     ; Otherwise, add the hotstring and reload the script:
+    WriteDebug("Storing custom element", Hotstring, "debug", "AutoCorrect")
     FileAppend, `n%Hotstring%, %thisFile%  ; Put a `n at the beginning in case file lacks a blank line at its end.
-    Reload
-    Sleep 200 ; If successful, the reload will close this instance during the Sleep, so the line below will never be reached.
-    MsgBox, 4,, The hotstring just added appears to be improperly formatted.  Would you like to open the script for editing? Note that the bad hotstring is at the bottom of the script.
-    IfMsgBox, Yes, Edit
+    if (AutoCorrect_AutoReload)
+        Reload
     return
 
     AutoCorrect_MoveCaret:
