@@ -1,10 +1,10 @@
 [
   {
-    "author": "Lipkau",
+    "author": "Oliver Lipkau",
     "date": "2016 11 21",
     "description": "Because none existed before this temporary description was created for \"AutoCorrect\". Change it to describe what it does with a couple of words.",
     "typ": "nfo",
-    "url": "",
+    "url": "https://github.com/lipkau/ol.modules/wiki/AutoCorrect",
     "version": "0.1"
   },
   {
@@ -30,6 +30,7 @@
       {
         "label": "Letters, digits, and/or symbols\nthat are eligible for this type of correction",
         "name": "AutoCorrect_Hoty_Keys",
+        "password_mode": false,
         "typ": "string",
         "value": "abcdefghijklmnopqrstuvwxyz"
       }
@@ -51,7 +52,7 @@
         "enabled": true,
         "functionCode": "AutoCorrect_AddCustom()",
         "functionMode": 0,
-        "key": "Win+F",
+        "key": "Win+H",
         "keyChange": true,
         "label": "Open dialog",
         "mode": "ahk",
@@ -61,6 +62,12 @@
         "scopeChange": false,
         "scopeMode": 0,
         "typ": "hotkey"
+      },
+      {
+        "label": "Automatically reload a2",
+        "name": "AutoCorrect_AutoReload",
+        "typ": "check",
+        "value": false
       }
     ],
     "disablable": false,
