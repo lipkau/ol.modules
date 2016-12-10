@@ -29,8 +29,8 @@ class urlShortener
      */
     Execute()
     {
-        WriteDebug("hotkey triggered", "", "i", this.moduleName)
-        WriteDebug("using service:", this.service, "debug", this.moduleName)
+        WriteDebug("Executing ""urlShortener""", "", "i", this.moduleName)
+        WriteDebug("Using service:", this.service, "debug", this.moduleName)
 
         ; Read clipboard
         longURL := clipboard
@@ -50,7 +50,7 @@ class urlShortener
 
             if (shortURL)
             {
-                WriteDebug("short url:", shortURL, "debug", this.moduleName)
+                WriteDebug("Short url:", shortURL, "debug", this.moduleName)
 
                 ; Store shortend URL in clipboard
                 Clipboard := ShortURL
