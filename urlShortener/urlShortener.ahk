@@ -38,15 +38,10 @@ class urlShortener
         ; Validate clip as url
         if (isURL(longURL))
         {
-            if (this.service == "goo.gl")
-            {
-                ; Shorten URL using goo.gl
+            if (this.service == "goo.gl")          ; Shorten URL using goo.gl
                 shortURL := this._googleShortening(longURL)
-            } else if (this.service == "tny.im")
-            {
-                ; Shorten URL using tny.im
+            else if (this.service == "tny.im")     ; Shorten URL using tny.im
                 shortURL := this._tnyimShortening(longURL)
-            }
 
             if (shortURL)
             {
@@ -107,6 +102,9 @@ class urlShortener
         return % obj.id
     }
 
+    /**
+     * Call the tny.om API to shorten URL
+     */
     _tnyimShortening(longURL)
     {
         ApiURi := "http://tny.im/yourls-api.php"
