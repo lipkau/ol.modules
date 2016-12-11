@@ -230,7 +230,7 @@
     ],
     "disablable": true,
     "enabled": false,
-    "label": "Custome Binding",
+    "label": "Custom Binding",
     "name": "VolumeManager_GroupBox4",
     "typ": "group"
   },
