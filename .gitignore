@@ -1,5 +1,8 @@
 _config_backups/
 
+# these file should be customizable by the user
+AutoCorrect/AutoCorrect.ahk
+
 # Exclude all starting with . or _
 _ *
 .*
