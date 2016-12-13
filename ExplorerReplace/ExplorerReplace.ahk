@@ -1,5 +1,5 @@
 ; ExplorerReplace - ExplorerReplace.ahk
-; author: Lipkau
+; author: Oliver Lipkau <https://github.com/lipkau>
 ; created: 2016 11 25
 
 #include lib\ahklib\CNotification.ahk
@@ -10,31 +10,38 @@
  *     * Callback from Context Menu
  */
 
-ExplorerReplace_Init()
-{
-    global ExplorerReplace_RegisterInContextMenu
-
-    ; Test if ExplorerExtension was loaded
-    if (!(IsFunc("InitExplorerWindows"))) {
-        Notify("Missing dependency", "ExplorerReplace could not be loaded because of a missing dependency: ExplorerExtension.", 5, NotifyIcons.Error, "ExplorerReplace_DependencyHelp")
-        return
-    }
-
-    if (ExplorerReplace_RegisterInContextMenu == true)
-    {
-        ; Register
-    } else {
-        ; Unregister
-    }
-}
-
-ExplorerReplace_DependencyHelp()
-{
-    Run, https://github.com/lipkau/ol.modules/wiki/ExplorerExtension#MissingDependencies
-}
+ ExplorerReplace_DependencyHelp()
+ {
+     Run, % ExplorerReplace.moduleHelp
+ }
 
 class ExplorerReplace
 {
+    /**
+     * Module properties
+     */
+    static moduleBundle := "ol.modules"
+    static moduleName   := "ExplorerReplace"
+    static moduleHelp   := "https://github.com/lipkau/ol.modules/wiki/ExplorerReplace"
+
+    Init()
+    {
+        global ExplorerReplace_RegisterInContextMenu
+
+        ; Test if ExplorerExtension was loaded
+        if (!(IsFunc("InitExplorerWindows"))) {
+            Notify("Missing dependency", "ExplorerReplace could not be loaded because of a missing dependency: ExplorerExtension.", 5, NotifyIcons.Error, "ExplorerReplace_DependencyHelp")
+            return
+        }
+
+        if (ExplorerReplace_RegisterInContextMenu == true)
+        {
+            ; Register
+        } else {
+            ; Unregister
+        }
+    }
+
     ShowGui()
     {
         global ExplorerWindows
@@ -336,14 +343,14 @@ Class CReplaceDialog
             key := SubStr(key, 2)
             if (WinGetClass("ahk_id " value) = "Button")
             {
-                WriteDebug("button " ControlGetText("", "ahk_id " value))
+                WriteDebug("button " ControlGetText("", "ahk_id " value), "", "debug", "ExplorerReplace")
                 this[key] := ControlGet("Checked","","", "ahk_id " value)
             }
             else if (WinGetClass("ahk_id " value) = "Edit")
                 this[key] := ControlGetText("", "ahk_id " value)
             else if (WinGetClass("ahk_id " value) = "ComboBox")
                 this[key] := ControlGetText("", "ahk_id " value)
-            WriteDebug(key "=" this[key] ", hwnd=" value ", class = " WinGetClass("ahk_id " value))
+            WriteDebug(key "=" this[key] ", hwnd=" value ", class = " WinGetClass("ahk_id " value), "", "debug", "ExplorerReplace")
         }
         this.SearchResults := Array()
         LV_Delete()
@@ -353,7 +360,7 @@ Class CReplaceDialog
         ControlSetText,, Stop, % "ahk_id " this.hCancel
         if (this.Filenames)
         {
-            this.DirectoryTree := Array()
+            this.DirectoryTree := {}
             this.DirectoryTree.Directory := true
             BasePath := ExplorerWindows.GetItemWithValue("hwnd", this.Parent).Path
             SplitPath, BasePath,Name,Path
@@ -637,7 +644,7 @@ Class CReplaceDialog
             if (this.TrimLineEnd && this.TrimLineEndEdit)
             {
                 NewText := RTrim(NewText, this.TrimLineEndEdit)
-                WriteDebug("trimmed " newtext)
+                WriteDebug("trimmed " newtext, "", "debug", "ExplorerReplace")
             }
             if (this.InsertLineChars && this.InsertLineCharsEdit && IsNumeric(this.InsertLineCharsPos) && this.InsertLineCharsPos >= 0)
             {

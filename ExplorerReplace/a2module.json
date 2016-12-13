@@ -12,7 +12,7 @@
     "typ": "include"
   },
   {
-    "code": "ExplorerReplace_Init()",
+    "code": "ExplorerReplace.Init()",
     "typ": "init"
   },
   {

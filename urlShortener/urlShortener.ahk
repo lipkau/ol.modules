@@ -18,9 +18,13 @@
  */
 class urlShortener
 {
+    /**
+     * Module properties
+     */
     static moduleBundle := "ol.modules"
     static moduleName   := "urlShortener"
     static moduleHelp   := "https://github.com/lipkau/ol.modules/wiki/urlShortener"
+
     static _defaultService := "goo.gl"
 
     /**

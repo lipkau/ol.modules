@@ -107,84 +107,195 @@
   {
     "children": [
       {
-        "label": "Auto-generate file names",
-        "name": "ScreenShotTool_AutoNaming",
-        "typ": "check",
-        "value": false
+        "children": [
+          {
+            "browse_type": "0",
+            "file_types": "",
+            "label": "ScreenShots are saved in",
+            "name": "ScreenShotTool_TargetPath",
+            "save_mode": false,
+            "typ": "path",
+            "value": "%AppData%\\a2\\ol.modules\\ScreenShotTool",
+            "writable": true
+          },
+          {
+            "items": [
+              "Auto Generated",
+              "Follows a Pattern",
+              "Prompted"
+            ],
+            "label": "File Name is",
+            "name": "ScreenShotTool_FileNametype",
+            "typ": "combo",
+            "user_edit": false
+          },
+          {
+            "label": "File Name Pattern",
+            "name": "ScreenShotTool_FileNamePattern",
+            "password_mode": false,
+            "typ": "string",
+            "value": "ScreenShot_\\t_\\n"
+          },
+          {
+            "text": "<b>\\t</b>: Title of the Window\n<b>\\n</b>: Counter\n<b>\\d</b>: Date/Time <i>(can be defined bellow)</i>",
+            "typ": "label"
+          },
+          {
+            "label": "Date/Time Format",
+            "name": "ScreenShotTool_FileNamePattern_Time",
+            "password_mode": false,
+            "typ": "string",
+            "value": "yyyyMMdd_HHmmss"
+          },
+          {
+            "items": [
+              "png",
+              "jpg",
+              "gif",
+              "tif",
+              "bmp"
+            ],
+            "label": "File Format",
+            "name": "ScreenShotTool_FileFormat",
+            "typ": "combo",
+            "user_edit": false
+          },
+          {
+            "decimals": 0,
+            "label": "Image Quality",
+            "max": 100.0,
+            "min": 10.0,
+            "name": "ScreenShotTool_Quality",
+            "slider": true,
+            "step_len": 5.0,
+            "suffix": "%",
+            "typ": "number",
+            "value": 10
+          },
+          {
+            "decimals": 0,
+            "label": "Image Scaling",
+            "max": 200.0,
+            "min": 10.0,
+            "name": "ScreenShotTool_Scaling",
+            "slider": true,
+            "step_len": 5.0,
+            "suffix": "%",
+            "typ": "number",
+            "value": 2
+          },
+          {
+            "label": "Save Image to Clipboard",
+            "name": "ScreenShotTool_SaveToClipboard",
+            "typ": "check",
+            "value": true
+          },
+          {
+            "label": "Save Image to File",
+            "name": "ScreenShotTool_SaveToFile",
+            "typ": "check",
+            "value": true
+          }
+        ],
+        "disablable": false,
+        "enabled": true,
+        "label": "",
+        "name": "ScreenShotTool_GroupBox2",
+        "typ": "group"
       },
       {
-        "label": "Visual feedback",
-        "name": "ScreenShotTool_VisualFeedback",
-        "typ": "check",
-        "value": true
+        "children": [
+          {
+            "label": "Capture Mouse Cursor",
+            "name": "ScreenShotTool_CaptureCursor",
+            "typ": "check",
+            "value": true
+          },
+          {
+            "label": "Acustic Feedback",
+            "name": "ScreenShotTool_AcusticFeedback",
+            "typ": "check",
+            "value": true
+          },
+          {
+            "label": "Visual Feedback",
+            "name": "ScreenShotTool_VisualFeedback",
+            "typ": "check",
+            "value": true
+          },
+          {
+            "decimals": 0,
+            "label": "Delay before taking a Screenshot",
+            "max": 30.0,
+            "min": 0.0,
+            "name": "ScreenShotTool_Timer",
+            "slider": true,
+            "step_len": 1.0,
+            "suffix": "seconds",
+            "typ": "number",
+            "value": 0
+          }
+        ],
+        "disablable": false,
+        "enabled": true,
+        "label": "",
+        "name": "ScreenShotTool_GroupBox2",
+        "typ": "group"
       },
       {
-        "label": "Acustic feedback",
-        "name": "ScreenShotTool_AcusticFeedback",
-        "typ": "check",
-        "value": true
-      },
-      {
-        "label": "Always store Screenshot in clipboard",
-        "name": "ScreenShotTool_StoreInClipboard",
-        "typ": "check",
-        "value": true
-      },
-      {
-        "browse_type": "0",
-        "file_types": "",
-        "label": "ScreenShots are saved in",
-        "name": "ScreenShotTool_TargetPath",
-        "save_mode": false,
-        "typ": "path",
-        "value": "%AppData%\\a2\\ol.modules\\ScreenShotTool",
-        "writable": true
-      },
-      {
-        "decimals": 0,
-        "label": "Delay before taking a Screenshot",
-        "max": 30.0,
-        "min": 0.0,
-        "name": "ScreenShotTool_Timer",
-        "slider": true,
-        "step_len": 1.0,
-        "suffix": "seconds",
-        "typ": "number",
-        "value": 0
-      },
-      {
-        "decimals": 0,
-        "label": "Image quality",
-        "max": 100.0,
-        "min": 10.0,
-        "name": "ScreenShotTool_Quality",
-        "slider": true,
-        "step_len": 5.0,
-        "suffix": "%",
-        "typ": "number",
-        "value": 95
-      },
-      {
-        "decimals": 0,
-        "label": "Image scaling",
-        "max": 200.0,
-        "min": 10.0,
-        "name": "ScreenShotTool_Scaling",
-        "slider": true,
-        "step_len": 5.0,
-        "suffix": "%",
-        "typ": "number",
-        "value": 100
-      },
-      {
-        "label": "Open file in Image Manager",
-        "name": "ScreenShotTool_openInManager",
-        "typ": "check",
-        "value": true
-      },
-      {
-        "text": "<i>This setting is only available if the <b>ImageConverter</b> module is active.</i>",
-        "typ": "label"
+        "children": [
+          {
+            "label": "Open file in Image Manager",
+            "name": "ScreenShotTool_openInManager",
+            "typ": "check",
+            "value": true
+          },
+          {
+            "text": "<i>This setting is only available if the <b>ImageConverter</b> module is active.</i>",
+            "typ": "label"
+          },
+          {
+            "label": "Turn Off Font Smoothing",
+            "name": "ScreenShotTool_DisableFontSmoothing",
+            "typ": "check",
+            "value": false
+          },
+          {
+            "label": "Turn Off Clear Type",
+            "name": "ScreenShotTool_DisableClearType",
+            "typ": "check",
+            "value": false
+          },
+          {
+            "label": "Disable Support for Party Hidden Windows",
+            "name": "ScreenShotTool_NoOverlappingWindows",
+            "typ": "check",
+            "value": true
+          },
+          {
+            "label": "Context Menu is part of Active Window",
+            "name": "ScreenShotTool_CatchContextMenu",
+            "typ": "check",
+            "value": true
+          },
+          {
+            "label": "Improve performance of interactive selection (partly disable transparency)",
+            "name": "ScreenShotTool_DisableTransparency1",
+            "typ": "check",
+            "value": false
+          },
+          {
+            "label": "Improve performance of interactive selection (fully disable transparency)",
+            "name": "ScreenShotTool_DisableTransparency2",
+            "typ": "check",
+            "value": false
+          }
+        ],
+        "disablable": false,
+        "enabled": true,
+        "label": "",
+        "name": "ScreenShotTool_GroupBox2",
+        "typ": "group"
       }
     ],
     "disablable": false,
