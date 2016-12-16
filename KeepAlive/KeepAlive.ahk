@@ -71,7 +71,7 @@ class KeepAlive {
         WriteDebug("Deactivating module", "", "i", this.moduleName)
 
         timer := this.timer
-        SetTimer % timer, 2000
+        SetTimer % timer, Off
         this.active := false
         Notify("KeepAlive dectivated", "", 2, NotifyIcons.Success)
     }
