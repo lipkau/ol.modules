@@ -2,39 +2,97 @@
 ; author: Oliver Lipkau
 ; created: 2016 11 13
 
+#include lib\ahklib\gdip.ahk
 #include lib\ahklib\CPrompt.ahk
+#include lib\ahklib\CManifest.ahk
 #include lib\ahklib\CNotification.ahk
 
 /**
  * TODO:
- *   * mouse cursor?
- *   * default file format in UI?
- *   * [bug] Fix area selection (size grows incorrectly)
- *   * [bug] Fix full screen shot
+ *     * cursor?
+ *     * append to name if already exists
  */
+
+ class CScreenShotToolModel
+ {
+    static moduleBundle, moduleName, moduleHelp
+    static manifest := new CManifest(A_LineFile)
+
+
+    __New()
+    {
+        this.modulePack := this.manifest.metdaData.package
+        this.moduleName := this.manifest.metaData.name
+        this.moduleHelp := this.manifest.metaData.url
+        return this
+    }
+ }
 
 /**
  * Class to manage the ScreenShot behavior
  */
-class ScreenShotTool
+class CScreenShotTool extends CScreenShotToolModel
 {
-    static _pTkoen := ""
-    static defaultQuality := 95
-    static defaultScale := 1.00
-    static FileExtension := "png" ; TODO
-    static defaultTargetPath := A_AppData "\a2\ol.modules\ScreenShotTool"
+    static counter
+
+    __New()
+    {
+        this.base.__New()
+        this.Counter := a2.db.get(this.manifest.metaData.package, this.moduleName, "counter")
+        this.pToken := Gdip_Startup()
+        return this
+    }
+
+    __Delete()
+    {
+        ; msgbox % "destructor"
+    }
 
     /**
      * Perform some initial setup when the module is loaded
      */
     Init()
     {
-        FileCreateDir % this.defaultTargetPath
-        this._pToken := Gdip_Startup()
+        global ScreenShotTool := new CScreenShotTool()
+        ; Ensure default values are saved in DB
+        ; inputFields := [
+        ;     , "ScreenShotTool_TargetPath"
+        ;     , "ScreenShotTool_this.fileNameType"
+        ;     , "ScreenShotTool_FileNamePattern"
+        ;     , "ScreenShotTool_FileNamePattern_Time"
+        ;     , "ScreenShotTool_FileFormat"
+        ;     , "ScreenShotTool_Quality"
+        ;     , "ScreenShotTool_Scaling"
+        ;     , "ScreenShotTool_SaveToClipboard"
+        ;     , "ScreenShotTool_CaptureCursor"
+        ;     , "ScreenShotTool_AcusticFeedback"
+        ;     , "ScreenShotTool_VisualFeedback"
+        ;     , "ScreenShotTool_Timer"
+        ;     , "ScreenShotTool_openInManager"
+        ;     , "ScreenShotTool_DisableFontSmoothing"
+        ;     , "ScreenShotTool_DisableClearType"
+        ;     , "ScreenShotTool_CatchContextMenu"
+        ;     , "ScreenShotTool_NoOverlappingWindows"
+        ;     , "ScreenShotTool_DisableTransparency1"
+        ;     , "ScreenShotTool_DisableTransparency2"]
+        ; for i,v in inputFields
+        ; {
+        ;     element := this.manifest.findUIElementByKey("name", v)
+        ;     if (element.typ != "combo")
+        ;         value := element.value
+        ;     else
+        ;         value := element.items[1]
+            ; a2.db.delete(this.manifest.metaData.package, this.moduleName, v)
+            ; a2.db.set(this.manifest.metaData.package, this.moduleName, v, value)
+        ; }
+
+        ; a2.db.increment(this.manifest.metaData.package, this.moduleName, "counter")
+        ; read screenshot counter from DB
+        ; a2.db.delete(this.manifest.metaData.package, this.moduleName, "counter")
     }
 
     /**
-     * Entry point for htokeys
+     * Entry point for hotkeys
      *     Take a screenshot depending on the hotkey
      *     Store the screenshot
      *     Open in ImageConverter
@@ -43,15 +101,16 @@ class ScreenShotTool
     {
         option := option ? option : "All"
 
-        WriteDebug("Triggered Screenshot with option:", option, "debug", "ScreenShotTool")
-        WriteDebug("UI Settings for Screenshot:", "Flash: "this.visualFeedback "|ShutteShound: " this.audioFeedback "|SaveToClip: ", "debug", "ScreenShotTool" this.saveToClipboard "|TargetPath: " targetPath "|OpenInManager: " this.openInManager "|Scale: " this.scale "|Delay: " this.delay "|LastArea: " this.lastArea "|SoundFile: " this.soundFile, "|")
+        WriteDebug("Triggered Screenshot with option:", option, "debug", this.moduleName)
+
         filePath := this.Capture(option)
-        if (!(filePath))
-            return
+
+        if (!filePath)
+            return ; failed to capture screen. Showing an error must be handled in the Capture() method
 
         Notify("Screenshot captured", "Screenshot was captured and stored.", 2, NotifyIcons.Success)
 
-        if (this.openInManager)
+        if ((this.openInManager) && (FileExist(filePath)))
         {
             ImageConverter := new CImageConverterAction()
             ImageConverter.Files := filePath
@@ -64,14 +123,31 @@ class ScreenShotTool
      * Capture the screen (or part of it) and store it in a temp file
      *
      * Sample:
-     * ScreenShot := new ScreenShotTool()
-     * ScreenShot.delay := 3                  ; Wait for 3 seconds before capturing the screen
-     * TODO
+     *     if (ScreenShotTool)    ; Check if class is available in runtime
+     *     {
+     *         ScreenShot                      := new ScreenShotTool()
+     *         ScreenShot.delay                := 3
+     *         ScreenShot.visualFeedback       := false
+     *         ScreenShot.audioFeedback        := false
+     *         ScreenShot.saveToClipboard      := false
+     *         ScreenShot.saveToFile           := true
+     *         ScreenShot.disableFontSmoothing := true
+     *         ScreenShot.disableClearType     := false
+     *         ScreenShot.quality              := 95
+     *         ScreenShot.fileName             := "myFile.jpg"
+     *         ScreenShot.targetPath           := myModule.Path
+     *         ScreenShot.openInManager        := false
+     *         ScreenShot.catchContextMenu     := false
+     *         ScreenShot.scale                := 1.5
+     *         ScreenShot.captureCursor        := false
+     *         ssFilePath := ScreenShot.Capture("Window")
+     *     }
      *
      * @param  string   type    Allowed values:
      *                              "All":      Screenshot of the entire desktop (multiple monitors, if so)
      *                              "Window":   Screenshot of the currently active window
-     *                              "Area":     Screenshot of the area the customer marked
+     *                              "Area":     Screenshot of the area. If no area is provided in param "coords",
+     *                                          the user gets a interaction screen to select the area
      *                              "LastArea": Screenshot of the last area the customer marked
      *                              "Monitor":  Screenshot of the Monitor on which the currently active window is
      * @param  string   coords  Coordinates of the area the customer selected. Format:
@@ -82,109 +158,452 @@ class ScreenShotTool
         ; delay the capturing
         if (IsNumeric(this.delay) && this.delay > 0)
         {
-            ; Critical, Off
-            ; SetBatchLines, -1
             MaxProgress := this.delay * 100
             if (MaxProcess == 100)
                 MaxProcess := 60
-            Progress, 5:H50 R0-%MaxProgress% B2 P%MaxProgress%,,%lng_scr_DelayProgress%
-            SetBatchLines, 2
+            Progress, 5:H50 R0-%MaxProgress% B2 P%MaxProgress%, , ScreenShot Delay
             Loop % MaxProgress
                 Progress % "5:" MaxProgress-A_Index
             Progress, 5:Off
-            ; SetBatchLines,-1
             Sleep, 50
         }
 
         if (type == "All")
         {
             ; Capture FullScreen
-            this._flash()
-            this._shutter()
-            pBitmap := Gdip_BitmapFromScreen()
-        } else if (type == "Window")
+            this.screenShotMode := "FullScreen"
+            storedFile := this._captureFromScreen()
+        }
+        else if (type == "Window")
         {
             ; Capture the active window
-            pBitmap := Gdip_BitmapFromHWND(WinExist("A"))
-            this._flash()
-            this._shutter()
-        } else if (type == "Area")
+            this.screenShotMode := "Window"
+            storedFile := this._captureFromScreen("A")
+        }
+        else if (type == "Area")
         {
             ; Capture the Area choosen by the user
-            coords := coords ? coords : this._markArea()
-            pBitmap := Gdip_BitmapFromScreen(coords)
-            this._flash()
-            this._shutter()
-        } else if (type == "LastArea")
+            this.screenShotMode := "Area"
+            coords := coords ? coords : this.SelectArea()
+            storedFile := this._captureFromScreen(coords)
+        }
+        else if (type == "LastArea")
         {
             ; Capture the last Area choosen by the user
+            this.screenShotMode := "Area"
             if (!(this.lastArea))
             {
                 Notify("Error", "No previous area could be found.`nPlease capture a Screenshot by defining an area before using this again", 3, NotifyIcons.Error)
                 return false
             }
-            pBitmap := Gdip_BitmapFromScreen(this.lastArea)
-            this._flash()
-            this._shutter()
-        } else if (type == "Monitor")
+            ; TODO: scr_sub_Hotkey_LastInteractive
+            storedFile := this._captureFromScreen(this.lastArea)
+        }
+        else if (type == "Monitor")
         {
             ; Capture the Monitor on which the ActiveWindow is located on
-            monitorId := GetMonitorIndexFromWindow(WinExist("A"))
-            monitorId := monitorId ? monitorId : 0
-            pBitmap := Gdip_BitmapFromScreen(monitorId)
-            this._flash()
-            this._shutter()
-        } else
+            this.screenShotMode := "Monitor"
+            storedFile := this._captureFromScreen(1)
+        }
+        else
         {
-            Notify("Error", "Invalid Screenshot Area", 4, NotifyIcons.Error)
+            Notify("Error", "Invalid Screenshot Type", 4, NotifyIcons.Error)
             return false
         }
 
-        ; Scale Image
-        nW := Gdip_GetImageWidth(pBitmap)
-        nH := Gdip_GetImageHeight(pBitmap)
-        nSW := Round(nW * this.scale)
-        nSH := Round(nH * this.scale)
-        nScaledBitmap := Gdip_CreateBitmap(nSW, nSH)
-        canvas := Gdip_GraphicsFromImage(nScaledBitmap)
-        Gdip_SetSmoothingMode(canvas, 4)
-        Gdip_SetInterpolationMode(canvas, 7)
-        Gdip_DrawImage(canvas, pBitmap, 0, 0, nSW, nSH) ;, 0, 0, nW, nH)
-
-        Gdip_DisposeImage(pBitmap)
-        Gdip_DeleteGraphics(canvas)
-
-        if (!(this.targetPath))
-        {
-            Notify("Error", "The path to where the Screenshots should be saved either doesn't exist or can't be accessed.", 3, NotifyIcons.Error)
-            return
-        }
-
-        storedFile := ExpandPathPlaceholders(this.targetPath "\" this.fileName)
-        Gdip_SaveBitmapToFile(nScaledBitmap, storedFile, this.quality)
-        Gdip_DisposeImage(nScaledBitmap)
-
-        ; Save to Clipboard
-        if (this.saveToClipboard)
-        {
-            pBitmap := Gdip_CreateBitmapFromFile(storedFile)
-            if (pBitmap)
-            {
-                hBitmap := Gdip_CreateHBITMAPFromBitmap(pBitmap)
-                WinClip.Clear()
-                WinClip.SetBitmap(hbitmap)
-                DeleteObject(hBitmap)
-            }
-            Gdip_DisposeImage(pBitmap)
-        }
-
         return storedFile
+    }
+
+    SelectArea()
+    {
+        ; TODO:
+        ; scr_sub_Hotkey_Interactive
+        ; scr_sub_GetFrameBounds
+        ; scr_sub_MoveWithKeys
+        ; scr_tim_MouseWatch
+    }
+
+    _captureFromScreen(aRect = 0)
+    {
+        this._disableFontSmoothing()
+
+        if (!aRect)  ; Capture the entire "virtual" desktop
+        {
+            GetVirtualScreenCoordinates(nL, nT, nW, nH)
+        }
+        else if (aRect == 1) ; Capture the active windows
+        {
+            WinGetPos, nL, nT, nW, nH, A
+            fixMaximizedScreenCoord("A", nL, nT, nW, nH)
+        }
+        else if (aRect = 2)  ; Capture the client area of the active window
+        {
+            WinGet, hWnd, ID, A
+            VarSetCapacity(rt, 16, 0)
+            DllCall("GetClientRect" , "Uint", hWnd, "Uint", &rt)
+            DllCall("ClientToScreen", "Uint", hWnd, "Uint", &rt)
+            nL := NumGet(rt, 0, "int")
+            nT := NumGet(rt, 4, "int")
+            nW := NumGet(rt, 8)
+            nH := NumGet(rt,12)
+        } else if (WinExist(aRect)) {
+            WinGet, sWinID, ID, % aRect
+            WinGetPos, nL, nT, nW, nH, % aRect
+            If ((aRect = "A") AND (this.catchContextMenu == true)) {
+                DetectHiddenWindows, Off
+                WinGet, sWinList, List
+                WinGetClass, sWinClass, ahk_id %sWinList1%
+                If (((sWinClass = "#32768") OR (sWinClass = "MozillaDropShadowWindowClass")) AND (sWinList1 != sWinID)) {
+                    WinGetClass, sWinClass, ahk_id %sWinList2%
+                    If (sWinClass == SysShadow)
+                        sWinList1 := sWinList2
+                    WinGetPos, nLcontext, nTcontext, nWcontext, nHcontext, ahk_id %sWinList1%
+                    If (nLcontext < nL) {
+                        this.noOverlappingWindows := true
+                        nL := nLcontext
+                    }
+                    If (nTcontext < nT) {
+                        this.noOverlappingWindows := true
+                        nT := nTcontext
+                    }
+                    If (nLcontext - nL + nWcontext > nW) {
+                        this.noOverlappingWindows := true
+                        nW := nLcontext - nL + nWcontext
+                    }
+                    If (nTcontext - nT + nHcontext > nH) {
+                        this.noOverlappingWindows := true
+                        nH := nTcontext - nT + nHcontext
+                    }
+                }
+            }
+        }
+        else  ; Capture the coordinates provided
+        {
+            StringSplit, rt, aRect, `,, %A_Space%%A_Tab%
+            nL := rt1
+            nT := rt2
+            nW := rt3 ; - rt1
+            nH := rt4 ; - rt2
+            znW := rt5
+            znH := rt6
+        }
+
+        ; Do not capture screen parts outside of the virtual desktop
+        If (!sWinID) {
+            GetVirtualScreenCoordinates(MonitorAreaLeft, MonitorAreaTop, MonitorAreaRight, MonitorAreaBottom)
+            If (nL < MonitorAreaLeft)
+                nL := MonitorAreaLeft
+            If (nT < MonitorAreaTop)
+                nT := MonitorAreaTop
+            If (nL+nW > MonitorAreaRight)
+                nW := MonitorAreaRight-nL
+            If (nT+nH > MonitorAreaBottom)
+                nH := MonitorAreaBottom-nT
+        }
+        WriteDebug("Capturing", nL ", " nT ", " nW ", " NH, "debug", this.moduleName)
+
+        WinGet, bExStyle, ExStyle, ahk_id %sWinID%
+        If ((sWinID) AND (!(bExStyle & 0x80000)) AND (!InStr(scr_Class,"SunAwt")) AND (!InStr(scr_Class,"javax.swing")) AND (this.noOverlappingWindows == false)) ; WS_EX_LAYERED
+        {
+            ncL := nL
+            ncT := nT
+            ncW := nW
+            ncH := nH
+
+            hDC := DllCall("GetDC", "Uint", 0)
+            mDC := DllCall("CreateCompatibleDC", "Uint", hDC)
+            hBM := DllCall("CreateCompatibleBitmap", "Uint", hDC, "int", nW, "int", nH)
+            oBM := DllCall("SelectObject", "Uint", mDC, "Uint", hBM)
+            fixMaximizedScreenCoord( aRect, ncL, ncT, ncW, ncH, 1 )
+            DllCall("PrintWindow", "UInt",sWinID, "UInt",mDC, "UInt",0)
+            if (this.captureCursor)
+            {
+                msgbox % "hit2"
+                this._captureCursor(mDC, nL, nT)
+            }
+            DllCall("SelectObject", "Uint", mDC, "Uint", oBM)
+            DllCall("DeleteDC", "Uint", mDC)
+            hBM := this._clipBitmap(hDC, hBM, ncL, ncT, ncW, ncH)
+        }
+        else
+        {
+            hDC := DllCall("GetDC", "Uint", 0)
+            mDC := DllCall("CreateCompatibleDC", "Uint", hDC)
+            hBM := DllCall("CreateCompatibleBitmap", "Uint", hDC, "int", nW, "int", nH)
+            oBM := DllCall("SelectObject", "Uint", mDC, "Uint", hBM)
+            DllCall("BitBlt", "Uint", mDC, "int", 0, "int", 0, "int", nW, "int", nH, "Uint", hDC, "int", nL, "int", nT, "Uint", 0x40000000 | 0x00CC0020)
+
+            if (this.captureCursor)
+            {
+                msgbox % "hit1"
+                this._captureCursor(mDC, nL, nT)
+            }
+            DllCall("SelectObject", "Uint", mDC, "Uint", oBM)
+            DllCall("DeleteDC", "Uint", mDC)
+        }
+        WriteDebug("captured BitMap", "", "debug", this.moduleName)
+
+        If (this.scale != 1)
+        {
+            znW := Round(nW * this.scale)
+            znH := Round(nH * this.scale)
+            ; What does this do?
+            ; StringSplit, rt, sZoom, `,*x, %A_Space%%A_Tab%
+            ; znW := rt1
+            ; znH := rt2
+
+            ; replace * wildcards
+            ; If znH = *
+                ; znH := nH
+            ; If znW = *
+                ; znW := nW
+
+            ; StringReplace, znW, znW, `:, /
+            ; Support resultions ie: "1/2"
+            ; IfInString znW, /
+            ; {
+            ;     StringSplit, znW, znW, /
+            ;     znH := Round(nH*znW1/znW2)
+            ;     znW := Round(nW*znW1/znW2)
+            ; }
+            ; Support scalling in % string ie: "120%"
+            ; Else IfInString znW, `%
+            ; {
+            ;     StringReplace, znW, znW, `%
+            ;     znH := Round(nH*znW/100)
+            ;     znW := Round(nW*znW/100)
+            ; }
+            ; Else
+            ; {
+            ;     ; support resultions ie: "640/?"
+            ;     If (znW = "" OR znW = "?")
+            ;         znW = 0
+            ;     If (znH = "" OR znH = "?")
+            ;         znH = 0
+            ;     If ((nW <= znW OR znW = 0) AND (nH <= znH OR znH = 0))
+            ;     {
+            ;         znW =
+            ;         znH =
+            ;     }
+            ;     Else
+            ;     {
+            ;         If znW = 0
+            ;         {
+            ;             zF := znH/nH
+            ;             znW := Round(nW * zF)
+            ;         }
+            ;         Else If znH = 0
+            ;         {
+            ;             zF := znW/nW
+            ;             znH := Round(nH * zF)
+            ;         }
+            ;         Else
+            ;         {
+            ;             zF := znW/nW
+            ;             If ((nH * zF) > znH)
+            ;             zF := znH/nH
+            ;             znH := Round(nH * zF)
+            ;             znW := Round(nW * zF)
+            ;         }
+            ;     }
+            ; }
+        }
+        ; pBitmap := Gdip_BitmapFromHWND(WinExist("A"))
+        ; WriteDebug("Rescaling from", nW ", " NH, "debug", this.moduleName)
+        ; WriteDebug("Rescaling to", znW ", " znH, "debug", this.moduleName)
+        ; If (znW && znH)
+            ; hBM := this._scaleBitmap(hDC, hBM, nW, nH, znW, znH)
+
+        ; nW := Gdip_GetImageWidth(pBitmap)
+        ; nH := Gdip_GetImageHeight(pBitmap)
+        ; nSW := Round(nW * this.scale)
+        ; nSH := Round(nH * this.scale)
+        ; hBM := Gdip_CreateBitmap(nSW, nSH)
+        ; canvas := Gdip_GraphicsFromImage(hBM)
+        ; Gdip_SetSmoothingMode(canvas, 4)
+        ; Gdip_SetInterpolationMode(canvas, 7)
+        ; Gdip_DrawImage(canvas, pBitmap, 0, 0, nSW, nSH) ;, 0, 0, nW, nH)
+
+
+        this.Flash(nL,nT,nW,nH)
+        this.Shutter()
+
+        this.counter := a2.db.increment(this.manifest.metaData.package, this.moduleName, "counter")
+        file := this.targetPath "\" this.filename
+        WriteDebug("File stored to " file, "", "debug", this.moduleName)
+        ; If (this.saveToClipboard)
+            ; Gdip_SetBitmapToClipboard(hBM)
+            this._storeToClipboard(hBM)
+        ; If (this.saveToFile)
+            ; filePath := this._storeToFile(hBM, file)
+            Gdip_SaveBitmapToFile(hBM, file)
+        DllCall("DeleteObject", "Uint", hBM)
+        DllCall("ReleaseDC", "Uint", 0, "Uint", hDC)
+
+        this._enableFontSmoothing()
+        this._refreshWindows()
+
+        return (filePath) ? filePath : -1
+    }
+
+    ; _storeToFile(sFileFr = "", sFileTo = "")
+    ; {
+    ;     If !sFileTo
+    ;         sFileTo := A_ScriptDir . "\screen.bmp"
+    ;     SplitPath, sFileTo, , , sExtTo
+
+    ;     ; hGdiPlus := DllCall("LoadLibrary", "str", "gdiplus.dll")
+    ;     ; hGdiPlus := this.pToken
+    ;     ; msgbox % hGdiPlus
+    ;     ; If (hGdiPlus = 0 AND FileExist(A_ScriptDir "\library\gdiplus.dll"))
+    ;         ; hGdiPlus := DllCall("LoadLibrary", "str", A_ScriptDir "\library\gdiplus.dll")
+    ;     VarSetCapacity(si, 16, 0), si := Chr(1)
+    ;     ; DllCall("gdiplus\GdiplusStartup", "UintP", pToken, "Uint", &si, "Uint", 0)
+    ;     DllCall("gdiplus\GdipGetImageEncodersSize", "UintP", nCount, "UintP", nSize)
+    ;     VarSetCapacity(ci, nSize)
+    ;     DllCall("gdiplus\GdipGetImageEncoders", "Uint", nCount, "Uint", nSize, "Uint", &ci)
+
+    ;     Loop, %nCount%
+    ;     {
+    ;         If !InStr(this._ansi4Unicode(NumGet(ci, 76 * (A_Index - 1) + 44)), "." . sExtTo)
+    ;             Continue
+    ;         pCodec := &ci + 76 * (A_Index - 1)
+    ;         Break
+    ;     }
+
+    ;     If !sFileFr
+    ;     {
+    ;         DllCall("OpenClipboard", "Uint", 0)
+    ;         If DllCall("IsClipboardFormatAvailable", "Uint", 2) && (hBM:=DllCall("GetClipboardData", "Uint", 2))
+    ;             DllCall("gdiplus\GdipCreateBitmapFromHBITMAP", "Uint", hBM, "Uint", 0, "UintP", pImage)
+    ;         DllCall("CloseClipboard")
+    ;     }
+    ;     Else If sFileFr Is Integer
+    ;         DllCall("gdiplus\GdipCreateBitmapFromHBITMAP", "Uint", sFileFr, "Uint", 0, "UintP", pImage)
+    ;     Else
+    ;         DllCall("gdiplus\GdipLoadImageFromFile", "Uint", this._unicode4Ansi(wFileFr,sFileFr), "UintP", pImage)
+    ;     If pImage
+    ;     {
+    ;         If sExtTo = jpg
+    ;         {
+    ;             DllCall("gdiplus\GdipGetEncoderParameterListSize", "Uint", pImage, "Uint", pCodec, "UintP", xSize)
+    ;             VarSetCapacity(pi, xSize)
+    ;             DllCall("gdiplus\GdipGetEncoderParameterList", "Uint", pImage, "Uint", pCodec, "Uint", xSize, "Uint", &pi)
+
+    ;             VarSetCapacity(xParam, 4 + 28 + 4)
+
+    ;             xValue := this.quality          ; JPEG Quality: 0 - 100
+    ;             NumPut(1, pi, 28)                  ; number of list
+    ;             ;32 - 48                           ; 16 byte CLSID of Encoder
+    ;             NumPut(1, pi, 48)                  ; number of values
+    ;             NumPut(4, pi, 52)                  ; type of values
+    ;             NumPut(xValue, NumGet(pi,56))      ; address of the value
+    ;             xParam := &pi + 28
+    ;         }
+    ;         Else
+    ;             xParam = 0
+
+    ;         DllCall("gdiplus\GdipSaveImageToFile", "Uint", pImage, "Uint", this._unicode4Ansi(wFileTo,sFileTo), "Uint", pCodec, "Uint", xParam)
+    ;         DllCall("gdiplus\GdipDisposeImage", "Uint", pImage)
+    ;     }
+
+    ;     ; DllCall("gdiplus\GdiplusShutdown" , "Uint", pToken)
+    ;     ; DllCall("FreeLibrary", "Uint", hGdiPlus)
+
+    ;     return sFileTo
+    ; }
+
+    _storeToClipboard(hMem, nFormat = 2)
+    {
+        DetectHiddenWindows, On
+        Process, Exist
+        WinGet, hAHK, ID, ahk_pid %ErrorLevel%
+        DllCall("OpenClipboard", "Uint", hAHK)
+        DllCall("EmptyClipboard")
+        DllCall("SetClipboardData", "Uint", nFormat, "Uint", hMem)
+        DllCall("CloseClipboard")
+    }
+
+    _ansi4Unicode(pString)
+    {
+        nSize := DllCall("WideCharToMultiByte", "Uint", 0, "Uint", 0, "Uint", pString, "int", -1, "Uint", 0, "int", 0, "Uint", 0, "Uint", 0)
+        VarSetCapacity(sString, nSize)
+        DllCall("WideCharToMultiByte", "Uint", 0, "Uint", 0, "Uint", pString, "int", -1, "str", sString, "int", nSize, "Uint", 0, "Uint", 0)
+        Return sString
+    }
+
+    _unicode4Ansi(ByRef wString, sString)
+    {
+        nSize := DllCall("MultiByteToWideChar", "Uint", 0, "Uint", 0, "Uint", &sString, "int", -1, "Uint", 0, "int", 0)
+        VarSetCapacity(wString, nSize * 2)
+        DllCall("MultiByteToWideChar", "Uint", 0, "Uint", 0, "Uint", &sString, "int", -1, "Uint", &wString, "int", nSize)
+        Return &wString
+    }
+
+    _scaleBitmap(hDC, hBM, nW, nH, znW, znH)
+    {
+        mDC1 := DllCall("CreateCompatibleDC", "Uint", hDC)
+        mDC2 := DllCall("CreateCompatibleDC", "Uint", hDC)
+        zhBM := DllCall("CreateCompatibleBitmap", "Uint", hDC, "int", znW, "int", znH)
+        oBM1 := DllCall("SelectObject", "Uint", mDC1, "Uint", hBM)
+        oBM2 := DllCall("SelectObject", "Uint", mDC2, "Uint", zhBM)
+        DllCall("SetStretchBltMode", "Uint", mDC2, "int", 4)
+        DllCall("StretchBlt", "Uint", mDC2, "int", 0, "int", 0, "int", znW, "int", znH, "Uint", mDC1, "int", 0, "int", 0, "int", nW, "int", nH, "Uint", 0x00CC0020)
+        DllCall("SelectObject", "Uint", mDC1, "Uint", oBM1)
+        DllCall("SelectObject", "Uint", mDC2, "Uint", oBM2)
+        DllCall("DeleteDC", "Uint", mDC1)
+        DllCall("DeleteDC", "Uint", mDC2)
+        DllCall("DeleteObject", "Uint", hBM)
+        Return zhBM
+    }
+
+    _clipBitmap(hDC, hBM, nL, nT, nW, nH)
+    {
+        mDC1 := DllCall("CreateCompatibleDC", "Uint", hDC)
+        mDC2 := DllCall("CreateCompatibleDC", "Uint", hDC)
+        zhBM := DllCall("CreateCompatibleBitmap", "Uint", hDC, "int", nW, "int", nH)
+        oBM1 := DllCall("SelectObject", "Uint", mDC1, "Uint", hBM)
+        oBM2 := DllCall("SelectObject", "Uint", mDC2, "Uint", zhBM)
+        DllCall("BitBlt", "Uint", mDC2, "int", 0, "int", 0, "int", nW, "int", nH, "Uint", mDC1, "int", nL, "int", nT, "Uint", 0x40000000 | 0x00CC0020)
+        DllCall("SelectObject", "Uint", mDC1, "Uint", oBM1)
+        DllCall("SelectObject", "Uint", mDC2, "Uint", oBM2)
+        DllCall("DeleteDC", "Uint", mDC1)
+        DllCall("DeleteDC", "Uint", mDC2)
+        DllCall("DeleteObject", "Uint", hBM)
+        Return zhBM
+    }
+
+    _captureCursor(hDC, nL, nT)
+    {
+        msgbox % "hit3"
+        VarSetCapacity(mi, 20, 0)
+        mi := Chr(20)
+        DllCall("GetCursorInfo", "Uint", &mi)
+        bShow := NumGet(mi, 4)
+        hCursor := NumGet(mi, 8)
+        xCursor := NumGet(mi,12)
+        yCursor := NumGet(mi,16)
+
+        VarSetCapacity(ni, 20, 0)
+        DllCall("GetIconInfo", "Uint", hCursor, "Uint", &ni)
+        xHotspot := NumGet(ni, 4)
+        yHotspot := NumGet(ni, 8)
+        hBMMask := NumGet(ni,12)
+        hBMColor := NumGet(ni,16)
+
+        If (bShow)
+            DllCall("DrawIcon", "Uint", hDC, "int", xCursor - xHotspot - nL, "int", yCursor - yHotspot - nT, "Uint", hCursor)
+        If (hBMMask)
+            DllCall("DeleteObject", "Uint", hBMMask)
+        If (hBMColor)
+            DllCall("DeleteObject", "Uint", hBMColor)
     }
 
     _refreshWindows()
     {
         DetectHiddenWindows, Off
         WinGet, windowList, List
+        WriteDebug("Refreshing Windows", List, "debug", this.moduleName)
 
         Loop, %windowList%
         {
@@ -195,39 +614,133 @@ class ScreenShotTool
 
     _enableFontSmoothing()
     {
-        If (scr_DisableFontSmoothing1 = 1 AND scr_OriginalFontSmoothing <> "")
-        {
-            DllCall("SystemParametersInfo", UInt, 75, UInt, scr_OriginalFontSmoothing, Char, 0, UInt,1 ) ; SPI_SETFONTSMOOTHING = 75
-            Gosub, scr_sub_RefreshWindows
+        If ((this.disableFontSmoothing) AND (this._originalFontSmoothing)) {
+            WriteDebug("Enabling FontSmoothing", "", "debug", this.moduleName)
+            DllCall("SystemParametersInfo", UInt, 75, UInt, this._originalFontSmoothing, Char, 0, UInt,1 ) ; SPI_SETFONTSMOOTHING = 75
         }
-        If (scr_DisableFontSmoothing2 = 1 AND scr_OriginalFontSmoothingType <> "")
-        {
-            DllCall("SystemParametersInfo", UInt, 0x200B, UInt, 0, Char, scr_OriginalFontSmoothingType, UInt,1 ) ; SPI_SETFONTSMOOTHINGTYPE = 0x200B
-            Gosub, scr_sub_RefreshWindows
+        If ((this.disableClearType) AND (this._originalFontSmoothingType)) {
+            WriteDebug("Enabling ClearType", "", "debug", this.moduleName)
+            DllCall("SystemParametersInfo", UInt, 0x200B, UInt, 0, Char, this._originalFontSmoothingType, UInt,1 ) ; SPI_SETFONTSMOOTHINGTYPE = 0x200B
         }
     }
 
     _disableFontSmoothing()
     {
-        If scr_DisableFontSmoothing1 = 1
-        {
-            ; Aktuelle Schriftglättung zwischenspeichern
+        If (this.disableFontSmoothing) {
+            WriteDebug("Disabling FontSmoothing", "", "debug", this.moduleName)
+            ; save the current fontsmoothing
             VarSetCapacity(scr_Result, 1)
             DllCall("SystemParametersInfo", UInt, 74, UInt, 0, Char, &scr_Result, UInt,1 ) ; SPI_GETFONTSMOOTHING = 74
-            scr_OriginalFontSmoothing := NumGet(scr_Result)
-            ; Schriftglättung ausschalten
+            this._originalFontSmoothing := NumGet(scr_Result)
+            WriteDebug("FontSmoothing: " this._originalFontSmoothing, "", "debug", this.moduleName)
+            ; disable font smoothing
             DllCall("SystemParametersInfo", UInt, 75, UInt, 0, Char, 0, UInt,1 ) ; SPI_SETFONTSMOOTHING = 75
-            Gosub, scr_sub_RefreshWindows
         }
-        If scr_DisableFontSmoothing2 = 1
-        {
-            ; Aktuelle Schriftglättung-Art zwischenspeichern
+        If (this.disableClearType) {
+            WriteDebug("Disabling ClearType", "", "debug", this.moduleName)
+            ; save the current ClearType
             VarSetCapacity(scr_Result, 1)
             DllCall("SystemParametersInfo", UInt, 0x200A, UInt, 0, Char, &scr_Result, UInt,1 ) ; SPI_GETFONTSMOOTHINGTYPE = 0x200A
-            scr_OriginalFontSmoothingType := NumGet(scr_Result)
-            ; ClearType ausschalten
+            this._originalFontSmoothingType := NumGet(scr_Result)
+            WriteDebug("ClearType: " this._originalFontSmoothingType, "", "debug", this.moduleName)
+            ; disable ClearType
             DllCall("SystemParametersInfo", UInt, 0x200B, UInt, 0, Char, 1, UInt,1 ) ; SPI_SETFONTSMOOTHINGTYPE = 0x200B
-            Gosub, scr_sub_RefreshWindows
+        }
+    }
+
+    fileNameType[]
+    {
+        get {
+            global ScreenShotTool_FileNameType
+
+            If (inArray(["Auto Generated","Follows a Pattern","Prompted"], this._fileNameType))
+                fileNameType := this._fileNameType
+
+            If (inArray(["Auto Generated","Follows a Pattern","Prompted"], ScreenShotTool_FileNameType))
+            {
+                fileNameType := this.manifest.findUIElementByKey("name", "ScreenShotTool_FileNameType")
+                fileNameType := fileNameType.items[1]
+            }
+            else
+                fileNameType := ScreenShotTool_FileNameType
+            return fileNameType
+
+        }
+        set {
+            If (!inArray(["Auto Generated","Follows a Pattern","Prompted"], value))
+            {
+                fileNameType := this.manifest.findUIElementByKey("name", "ScreenShotTool_FileNameType")
+                return this._fileNameType := fileNameType.items[1]
+            }
+            else
+                return this._fileNameType := value
+        }
+    }
+
+    fileNamePattern[]
+    {
+        get {
+            global ScreenShotTool_FileNamePattern
+
+            if (this._fileNamePattern)
+                return this._fileNamePattern
+
+            If (!ScreenShotTool_FileNamePattern)
+                return this.manifest.findUIElementByKey("name", "ScreenShotTool_FileNamePattern")
+            else
+                return ScreenShotTool_FileNamePattern
+
+        }
+        set {
+            return this._fileNamePattern := value
+        }
+    }
+
+    timePattern[]
+    {
+        get {
+            global ScreenShotTool_FileNamePattern_Time
+
+            if (this._timePattern)
+                return this._timePattern
+
+            If (!ScreenShotTool_FileNamePattern_Time)
+                return this.manifest.findUIElementByKey("name", "ScreenShotTool_FileNamePattern_Time")
+            else
+                return ScreenShotTool_FileNamePattern_Time
+
+        }
+        set {
+            return this._timePattern := value
+        }
+    }
+
+    fileFormat[]
+    {
+        get {
+            global ScreenShotTool_FileFormat
+
+            If (inArray(["png", "jpg", "gif", "tif", "bmp"], this._fileFormat))
+                return this._fileFormat
+
+            If (!inArray(["png", "jpg", "gif", "tif", "bmp"], ScreenShotTool_FileFormat))
+            {
+                fileFormat := this.manifest.findUIElementByKey("name", "ScreenShotTool_FileFormat")
+                fileFormat := fileFormat.items[1]
+            }
+            else
+                fileFormat := ScreenShotTool_FileFormat
+            return fileFormat
+
+        }
+        set {
+            If (!inArray(["png", "jpg", "gif", "tif", "bmp"], ScreenShotTool_FileFormat))
+            {
+                fileFormat := this.manifest.findUIElementByKey("name", "ScreenShotTool_FileFormat")
+                return this._fileFormat := fileFormat.items[1]
+            }
+            else
+                return this._fileFormat := value
         }
     }
 
@@ -239,30 +752,64 @@ class ScreenShotTool
     fileName[]
     {
         get {
-            global ScreenShotTool_AutoNaming
+            illigalChars = (\||\/|\\|\?|`%|\*|:|"|<|>|`n|`r|`t)
 
-            If (!(CPrompt)) {
-                WriteDebug("Screenshot: CPrompt is not available", "debug", "ScreenShotTool")
-                ScreenShotTool_AutoNaming := true
-            }
-
+            ; if fileName[] was already set in instance, use that value
             if (this._fileName) {
-                WriteDebug("Screenshot: filename was set to: " this._fileName, "debug", "ScreenShotTool")
+                WriteDebug("Filename was set to: " this._fileName, "debug", this.moduleName)
                 return this._fileName
             }
-            else if (ScreenShotTool_AutoNaming == true) {
-                WriteDebug("Screenshot: Filename is autogenerated", "debug", "ScreenShotTool")
-                return "ScreenShot_" A_Now ".png"
+
+            ; decide what method to use for naming the file
+            if (this.fileNameType == "Auto Generated") {
+                WriteDebug("Filename is autogenerated", "debug", this.moduleName)
+                return "ScreenShot_" A_Now "." this.fileFormat
             }
-            else {
-                WriteDebug("Screenshot: about to prompt user for Filename", "debug", "ScreenShotTool")
+            else if (this.fileNameType == "Follows a Pattern") {
+                WriteDebug("Filename is generated from pattern", "", "debug", this.moduleName)
+                fileName := this.fileNamePattern "." this.fileFormat
+                if (InStr(fileName, "\n")) {
+                    counter := StringRight(repeat("0", 9), 9 - StrLen(this.counter)) "" this.counter
+                    fileName := StringReplace(fileName, "\n", counter, "A")
+                }
+                if (InStr(fileName, "\d")) {
+                    fileName := StringReplace(fileName, "\d", FormatTime("", this.timePattern), "A")
+                }
+                if (InStr(fileName, "\t")) {
+                    if (this.screenShotMode == "Window")
+                        screenShotMode := this.screenShotMode "_" WinGetActiveTitle()
+                    else
+                        screenShotMode := this.screenShotMode
+
+                    fileName := StringReplace(fileName, "\t", screenShotMode, "A")
+                }
+
+                ; did fileName end up empty?
+                if (!fileName) {
+                    WriteDebug("Filename is autogenerated", "debug", this.moduleName)
+                    return "ScreenShot_" A_Now "." this.fileFormat
+                }
+
+                ; remove invalid chars
+                fileName := RegExReplace(fileName, illigalChars,"_")
+
+                return fileName
+            } else {
                 global ScreenShotTools_PromptObject
+
+                WriteDebug("Filename is prompted to user", "debug", this.moduleName)
+
                 ScreenShotTools_PromptObject := new CPrompt()
                 ScreenShotTools_PromptObject.Text := "Enter a filename for the screenshot (without extension)"
                 ScreenShotTools_PromptObject.Title := "Enter filename"
                 ScreenShotTools_PromptObject.Placeholder := "NewName"
                 ScreenShotTools_PromptObject.Cancel := true
-                return ScreenShotTools_PromptObject.prompt() ".png"
+                fileName := ScreenShotTools_PromptObject.prompt()
+
+                ; remove invalid chars
+                fileName := RegExReplace(fileName, illigalChars, "_")
+
+                return fileName "." this.fileFormat
             }
         }
         set {
@@ -285,7 +832,7 @@ class ScreenShotTool
                 return (ScreenShotTool_VisualFeedback == true) ? true : false
         }
         set {
-            return (value == true) ? true : false
+            return this._visualFeedback := (value == true) ? true : false
         }
     }
 
@@ -316,15 +863,77 @@ class ScreenShotTool
     saveToClipboard[]
     {
         get {
-            global ScreenShotTool_StoreInClipboard
-            if (this._saveToClip)
-                return this._saveToClip
+            global ScreenShotTool_SaveToClipboard
+            if (this._saveToClipboard)
+                return this._saveToClipboard
             else
-                return (ScreenShotTool_StoreInClipboard == true) ? true : false
+                return (ScreenShotTool_SaveToClipboard == true) ? true : false
         }
         set {
-            return this._saveToClip := (value == true) ? true : false
+            return this._saveToClipboard := (value == true) ? true : false
         }
+    }
+
+    saveToFile[]
+    {
+        get {
+            global ScreenShotTool_SaveToFile
+            if (this._saveToFile)
+                return this._saveToFile
+            else
+                return (ScreenShotTool_SaveToFile == true) ? true : false
+        }
+        set {
+            return this._saveToFile := (value == true) ? true : false
+        }
+    }
+
+    disableFontSmoothing[]
+    {
+        get {
+            global ScreenShotTool_DisableFontSmoothing
+            if (this._disableFontSmoothing)
+                return this._disableFontSmoothing
+            else
+                return (ScreenShotTool_DisableFontSmoothing == true) ? true : false
+        }
+        set {
+            return this._disableFontSmoothing := (value == true) ? true : false
+        }
+    }
+
+    disableClearType[]
+    {
+        get {
+            global ScreenShotTool_DisableClearType
+            if (this._disableClearType)
+                return this._disableClearType
+            else
+                return (ScreenShotTool_DisableClearType == true) ? true : false
+        }
+        set {
+            return this._disableClearType := (value == true) ? true : false
+        }
+    }
+
+    quality[]
+    {
+        get {
+           global ScreenShotTool_Quality
+
+           if (this._quality)
+               return this._quality
+           else if (IsNumeric(ScreenShotTool_Quality))
+               return ScreenShotTool_Quality
+           else
+               return this.manifest.findUIElementByKey("name", "ScreenShotTool_Quality")
+       }
+       set {
+           if (IsNumeric(value))
+               return this._quality := value
+           else
+               return this._quality := this.manifest.findUIElementByKey("name", "ScreenShotTool_Quality")
+       }
     }
 
     /**
@@ -336,12 +945,21 @@ class ScreenShotTool
     {
         get {
             global ScreenShotTool_TargetPath
+
             if (this._targetPath)
-                return this._targetPath
+                targetPath := this.targetPath
             else if (ScreenShotTool_TargetPath)
-                return ScreenShotTool_TargetPath
+                targetPath := ScreenShotTool_TargetPath
             else
-                return this.defaultTargetPath
+                targetPath := this.manifest.findUIElementByKey("name", "ScreenShotTool_TargetPath")
+
+            targetPath := ExpandPathPlaceholders(targetPath)
+
+            FileCreateDir % targetPath
+            if (FileExist(targetPath))
+                return targetPath
+            else
+                return -1
         }
         set {
             return this._targetPath := value
@@ -375,6 +993,20 @@ class ScreenShotTool
         }
     }
 
+    catchContextMenu[]
+    {
+        get {
+            global ScreenShotTool_CatchContextMenu
+            if (this._catchContextMenu)
+                return this._catchContextMenu
+            else
+                return (ScreenShotTool_CatchContextMenu == true) ? true : false
+        }
+        set {
+            return this._catchContextMenu := (value == true) ? true : false
+        }
+    }
+
     /**
      * Property for how the screenshot should be scaled.
      * examples:
@@ -394,13 +1026,13 @@ class ScreenShotTool
             else if (IsNumeric(ScreenShotTool_Scaling))
                 return ScreenShotTool_Scaling / 100
             else
-                return this.defaultScale
+                return this.manifest.findUIElementByKey("name", "ScreenShotTool_Scaling")
         }
         set {
             if (IsNumeric(value))
-                return this._delay := value
+                return this._scale := value
             else
-                return this._scale := this.defaultScale
+                return this._scale := this.manifest.findUIElementByKey("name", "ScreenShotTool_Scaling")
         }
     }
 
@@ -465,109 +1097,100 @@ class ScreenShotTool
         }
     }
 
-    /**
-     * Private Method
-     * Record the start and end coordinates the user marks, while showing a transperancy for visualization of the area
-     */
-    _markArea()
+    captureCursor[]
     {
-        Loop
+        get {
+            global ScreenShotTool_CaptureCursor
+            if (this._captureCursor)
+                return this._captureCursor
+            else
+                return (ScreenShotTool_CaptureCursor == true) ? true : false
+        }
+        set {
+            return this._captureCursor := (value == true) ? true : false
+        }
+    }
+
+    noOverlappingWindows[]
+    {
+        get {
+            global ScreenShotTool_NoOverlappingWindows
+            if (this._noOverlappingWindows)
+                return this._noOverlappingWindows
+            else
+                return (ScreenShotTool_NoOverlappingWindows == true) ? true : false
+        }
+        set {
+            return this._noOverlappingWindows := (value == true) ? true : false
+        }
+    }
+
+    class cCursor
+    {
+        static pAppstarting := 32650
+        static pHand := 32649
+        static pArrow := 32512
+        static pCross := 32515
+        static pIbeam := 32513
+        static pIcon := 32641
+        static pNo := 32648
+        static pSize := 32640
+        static pSizeall := 32646
+        static pSizenesw := 32643
+        static pSizens := 32645
+        static pSizenwse := 32642
+        static pSizewe := 32644
+        static pUparrow := 32516
+        static pWait := 32514
+        static pHelp := 32651
+
+        cross[]
         {
-            if (GetKeyState("Escape", "p") == "D")
-            {
-                Gui, % this.tmpGuiNum0 ": Destroy"
-                Gui, % this.tmpGuiNum ": Destroy"
-                this.Remove("tmpMX")
-                this.Remove("tmpMY")
-                this.Remove("tmpGuiNum")
-                this.Remove("tmpGuiNum0")
-                this.Remove("tmpGuiNum1")
-                this.Remove("tmpState")
-                return false
+            get {
+                if (FileExist(A_LineFile "\..\resoureces\cross.cur"))
+                    hCursor := DllCall("LoadCursorFromFile", Str, A_LineFile "\..\resoureces\cross.cur")
+                else if (FileExist(A_WinDir "\cursors\cross_rl.cur"))
+                    hCursor := DllCall("LoadCursorFromFile", Str, A_WinDir "\cursors\cross_rl.cur")
+                else
+                    hCursor := DllCall("LoadCursor","UInt",NULL, "Int", this.pCross)
+
+                cursor := DllCall("CopyImage", "UInt", hCursor, "uint",2, "int",0, "int",0, "uint",0)
+                DllCall("DestroyCursor","Uint",hCursor)
+
+                return cursor
             }
-            if(!this.tmpState)
-            {
-                this.tmpState := 1
-                ;Credits of code below go to sumon/Learning one
-                CoordMode, Mouse ,Screen
-                this.tmpGuiNum0 := GetFreeGUINum(10)
-                Gui % this.tmpGuiNum0 ": Default"
-                Gui, +AlwaysOnTop -caption -Border +ToolWindow +LastFound
-                Gui, Color, White
-                Gui, Font, s50 c0x5090FF, Verdana
-                Gui, Add, Text, % "x0 y" (A_ScreenHeight/10) " w" A_ScreenWidth " Center", Drag a rectangle around the area you want to capture!
-                WinSet, TransColor, White
-                this.tmpGuiNum := GetFreeGUINum(10)
-                Gui % this.tmpGuiNum ": Default"
-                SysGet, VirtualX, 76
-                SysGet, VirtualY, 77
-                SysGet, VirtualW, 78
-                SysGet, VirtualH, 79
-                Gui, +AlwaysOnTop -caption +Border +ToolWindow +LastFound
-                WinSet, Transparent, 1
-                Gui % this.tmpGuiNum0 ":Show", X%VirtualX% Y%VirtualY% W%VirtualW% H%VirtualH%
-                Gui, Show, X%VirtualX% Y%VirtualY% W%VirtualW% H%VirtualH%
-                this.tmpGuiNum1 := GetFreeGUINum(10)
-                Gui % this.tmpGuiNum1 ": Default"
-                Gui, +AlwaysOnTop -caption +Border +ToolWindow +LastFound
-                WinSet, Transparent, 120
-                Gui, Color, 0x5090FF
-                continue
+        }
+
+        arrow[]
+        {
+            get {
+                hCursor := DllCall("LoadCursor","UInt",NULL, "Int", this.pArrow)
+                cursor := DllCall("CopyImage", "UInt", hCursor, "uint",2, "int",0, "int",0, "uint",0)
+                DllCall("DestroyCursor","Uint",hCursor)
+
+                return cursor
             }
-            else if(this.tmpState = 1) ;Wait for mouse down
-            {
-                if (GetKeyState("LButton", "p") == "D")
-                {
-                    this.tmpState := 2
-                    MouseGetPos, MX, MY
-                    this.tmpMX := MX
-                    this.tmpMY := MY
-                }
-                continue
+        }
+
+        sizeAll[]
+        {
+            get {
+                hCursor := DllCall("LoadCursor","UInt",NULL, "Int", this.pSizeAll)
+                cursor := DllCall("CopyImage", "UInt", hCursor, "uint",2, "int",0, "int",0, "uint",0)
+                DllCall("DestroyCursor","Uint",hCursor)
+
+                return cursor
             }
-            else if(this.tmpState = 2) ;Dragging
-            {
-                MouseGetPos, MXend, MYend
-                w := abs(this.tmpMX - MXend)
-                h := abs(this.tmpMY - MYend)
-                If ( this.tmpMX < MXend )
-                    X := this.tmpMX
-                Else
-                    X := MXend
-                If ( this.tmpMY < MYend )
-                    Y := this.tmpMY
-                Else
-                    Y := MYend
-                Gui, % this.tmpGuiNum1 ": Show", x%X% y%Y% w%w% h%h%
-                if(GetKeyState("LButton", "p") == "D") ;Resize selection rectangle
-                   continue
-                else ;Mouse release
-                {
-                    Gui, % this.tmpGuiNum1 ": Destroy"
-                    If ( this.tmpMX > MXend )
-                    {
-                       temp := this.tmpMX
-                       this.tmpMX := MXend
-                       MXend := temp
-                    }
-                    If ( this.tmpMY > MYend )
-                    {
-                       temp := this.tmpMY
-                       this.tmpMY := MYend
-                       MYend := temp
-                    }
-                    Gui, % this.tmpGuiNum0 ": Destroy"
-                    Gui, % this.tmpGuiNum ": Destroy"
-                    this.lastArea := this.tmpMX "|" this.tmpMY "|" w "|" h
-                    this.Remove("tmpMX")
-                    this.Remove("tmpMY")
-                    this.Remove("tmpGuiNum")
-                    this.Remove("tmpGuiNum0")
-                    this.Remove("tmpGuiNum1")
-                    this.Remove("tmpState")
-                    WriteDebug("ScreenShot: user selected area: " this.lastArea, "debug", "ScreenShotTool")
-                    return this.lastArea
-                }
+        }
+
+        hand[]
+        {
+            get {
+                hCursor := DllCall("LoadCursor","UInt",NULL, "Int", this.pHand)
+                cursor := DllCall("CopyImage", "UInt", hCursor, "uint",2, "int",0, "int",0, "uint",0)
+                DllCall("DestroyCursor","Uint",hCursor)
+
+                return cursor
             }
         }
     }
@@ -578,12 +1201,15 @@ class ScreenShotTool
      *
      * TODO: make flash only affect area that was captured
      */
-    _flash()
+    Flash(nL, nT, nW, nH)
     {
-        SysGet, nL, 76  ; virtual screen left & top
-        SysGet, nT, 77
-        SysGet, nW, 78  ; virtual screen width and height
-        SysGet, nH, 79
+        if (!(nL AND nT AND nW AND nH))
+        {
+            SysGet, nL, 76  ; virtual screen left & top
+            SysGet, nT, 77
+            SysGet, nW, 78  ; virtual screen width and height
+            SysGet, nH, 79
+        }
 
         if (this.visualFeedback)
         {
@@ -595,7 +1221,7 @@ class ScreenShotTool
      * Private Method
      * Wrapper for conditional shutter
      */
-    _shutter()
+    Shutter()
     {
         if (this.audioFeedback)
             IfExist % this.soundFile
@@ -611,7 +1237,7 @@ class ScreenShotTool
     _flashArea(nL, nT, nW, nH)
     {
         GuiNum:=GetFreeGUINum(1, "Flash")
-        this.tmpFlashGui := GuiNum
+        this._tmpFlashGui := GuiNum
         Gui,%GuiNum%:Destroy
         Gui,%GuiNum%:+LabelFlash +AlwaysOnTop -Caption -Border +ToolWindow -Resize +Disabled
         Gui,%GuiNum%:+LastFound
@@ -620,16 +1246,18 @@ class ScreenShotTool
             ; WinSet,Transparent,196
         Gui,%GuiNum%:Show, X%nL% Y%nT% W%nW% H%nH% NA
 
-        SetTimer, ScreenShotTool_CloseHighlight, 100
+        if (!this.timerCloseHighlight)
+            this.timerCloseHighlight := ObjBindMethod(this, "_flashAreaOff")
+        timer := this.timerCloseHighlight
+        SetTimer % timer, 120
     }
+
     _flashAreaOff()
     {
-        Gui, % this.tmpFlashGui ": Destroy"
+        timer := this.timerCloseHighlight
+        SetTimer % timer, Off
+
+        Gui, % this._tmpFlashGui ": Destroy"
         this.Remove("tmpGuiNum")
     }
 }
-
-ScreenShotTool_CloseHighlight:
-    SetTimer, ScreenShotTool_CloseHighlight, Off
-    ScreenShotTool._flashAreaOff()
-return
