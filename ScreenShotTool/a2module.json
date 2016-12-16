@@ -12,7 +12,7 @@
     "typ": "include"
   },
   {
-    "code": "ScreenShotTool.Init()",
+    "code": "CScreenShotTool.Init()",
     "typ": "init"
   },
   {
@@ -125,7 +125,7 @@
               "Prompted"
             ],
             "label": "File Name is",
-            "name": "ScreenShotTool_FileNametype",
+            "name": "ScreenShotTool_FileNameType",
             "typ": "combo",
             "user_edit": false
           },
@@ -137,7 +137,7 @@
             "value": "ScreenShot_\\t_\\n"
           },
           {
-            "text": "<b>\\t</b>: Title of the Window\n<b>\\n</b>: Counter\n<b>\\d</b>: Date/Time <i>(can be defined bellow)</i>",
+            "text": "<b>\\t</b>: Type of ScreenShot <i>(Fullscreen | Window | Area | ...)</i>\n<b>\\n</b>: Counter\n<b>\\d</b>: Date/Time <i>(can be defined bellow)</i>",
             "typ": "label"
           },
           {
