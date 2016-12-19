@@ -3,10 +3,13 @@
 ; created: 2016 11 13
 
 #include lib\ahklib\gdip.ahk
+#include lib\ahklib\_Struct.ahk
 #include lib\ahklib\CPrompt.ahk
 #include lib\ahklib\CManifest.ahk
 #include lib\ahklib\CNotification.ahk
-
+Struct(Structure, pointer:=0, init:=0) {
+    return new _Struct(Structure,pointer,init)
+}
 /**
  * TODO:
  *     * cursor?
@@ -299,16 +302,15 @@ class CScreenShotTool extends CScreenShotToolModel
             If (nT+nH > MonitorAreaBottom)
                 nH := MonitorAreaBottom-nT
         }
-        WriteDebug("Capturing", nL ", " nT ", " nW ", " NH, "debug", this.moduleName)
 
         WinGet, bExStyle, ExStyle, ahk_id %sWinID%
         If ((sWinID) AND (!(bExStyle & 0x80000)) AND (!InStr(scr_Class,"SunAwt")) AND (!InStr(scr_Class,"javax.swing")) AND (this.noOverlappingWindows == false)) ; WS_EX_LAYERED
         {
-            WriteDebug("captured BitMap 2", "", "debug", this.moduleName)
             ncL := nL
             ncT := nT
             ncW := nW
             ncH := nH
+            WriteDebug("Capturing Bitmap ALT", "x: " ncL ", y: " ncT ", w: " ncW ", h: " ncH, "debug", this.moduleName)
 
             hDC := DllCall("GetDC", "Uint", 0)
             mDC := DllCall("CreateCompatibleDC", "Uint", hDC)
@@ -324,7 +326,8 @@ class CScreenShotTool extends CScreenShotToolModel
         }
         else
         {
-            WriteDebug("captured BitMap 1", "", "debug", this.moduleName)
+            WriteDebug("Capturing Bitmap", "x: " nL ", y: " nT ", w: " nW ", h: " nH, "debug", this.moduleName)
+
             hDC := DllCall("GetDC", "Uint", 0)
             mDC := DllCall("CreateCompatibleDC", "Uint", hDC)
             hBM := DllCall("CreateCompatibleBitmap", "Uint", hDC, "int", nW, "int", nH)
@@ -401,8 +404,6 @@ class CScreenShotTool extends CScreenShotToolModel
             ;         }
             ;     }
             ; }
-            WriteDebug("Rescaling from", nW ", " NH, "debug", this.moduleName)
-            WriteDebug("Rescaling to", znW ", " znH, "debug", this.moduleName)
         }
         If (znW && znH)
             hBM := this._scaleBitmap(hDC, hBM, nW, nH, znW, znH)
@@ -412,60 +413,63 @@ class CScreenShotTool extends CScreenShotToolModel
 
         this.counter := a2.db.increment(this.modulePack, this.moduleName, "counter")
         file := this.targetPath "\" this.filename
-        WriteDebug("File stored to " file, "", "debug", this.moduleName)
         If (this.saveToClipboard)
             this._storeToClipboard(hBM)
         If (this.saveToFile)
-            filePath := this._storeToFile(hBM, file)
+            this._storeToFile(hBM, file)
         DllCall("DeleteObject", "Uint", hBM)
         DllCall("ReleaseDC", "Uint", 0, "Uint", hDC)
 
         this._enableFontSmoothing()
         this._refreshWindows()
 
-        return (filePath) ? filePath : -1
-    }
-
-    _saveHBITMAPToFile(hBitmap, sFile)
-    {
-        DllCall("GetObject", "Uint", hBitmap, "int", VarSetCapacity(oi,84,0), "Uint", &oi)
-        hFile:=    DllCall("CreateFile", "Uint", &sFile, "Uint", 0x40000000, "Uint", 0, "Uint", 0, "Uint", 2, "Uint", 0, "Uint", 0)
-        DllCall("WriteFile", "Uint", hFile, "int64P", 0x4D42|14+40+NumGet(oi,44)<<16, "Uint", 6, "UintP", 0, "Uint", 0)
-        DllCall("WriteFile", "Uint", hFile, "int64P", 54<<32, "Uint", 8, "UintP", 0, "Uint", 0)
-        DllCall("WriteFile", "Uint", hFile, "Uint", &oi+24, "Uint", 40, "UintP", 0, "Uint", 0)
-        DllCall("WriteFile", "Uint", hFile, "Uint", NumGet(oi,20), "Uint", NumGet(oi,44), "UintP", 0, "Uint", 0)
-        DllCall("CloseHandle", "Uint", hFile)
-    }
-
-    _createDIBSectionForScreenCapture(hDC, nW, nH, bpp = 32, ByRef pBits = "")
-    {
-        NumPut(VarSetCapacity(bi, 40, 0), bi)
-        NumPut(nW, bi, 4)
-        NumPut(nH, bi, 8)
-        NumPut(bpp, NumPut(1, bi, 12, "UShort"), 0, "Ushort")
-        NumPut(0,  bi,16)
-        Return    DllCall("gdi32\CreateDIBSection", "Uint", hDC, "Uint", &bi, "Uint", 0, "UintP", pBits, "Uint", 0, "Uint", 0)
+        return (this.saveToFile) ? file : -1
     }
 
     _storeToFile(sFileFr = "", sFileTo = "")
     {
+        WriteDebug("File stored to", sFileTo, "debug", this.moduleName)
+
+        Ptr := A_PtrSize ? "UPtr" : "UInt"
+
         If !sFileTo
-            sFileTo := A_ScriptDir . "\screen.bmp"
+            sFileTo := A_LineFile . "\screen.bmp"
         SplitPath, sFileTo, , , sExtTo
+        Extension := "." sExtTo
 
         hGdiPlus := DllCall("LoadLibrary", "str", "gdiplus.dll")
         VarSetCapacity(si, 16, 0), si := Chr(1)
         DllCall("gdiplus\GdiplusStartup", "UintP", pToken, "Uint", &si, "Uint", 0)
-        DllCall("gdiplus\GdipGetImageEncodersSize", "UintP", nCount, "UintP", nSize)
+        DllCall("gdiplus\GdipGetImageEncodersSize", "uint*", nCount, "uint*", nSize)
         VarSetCapacity(ci, nSize)
-        DllCall("gdiplus\GdipGetImageEncoders", "Uint", nCount, "Uint", nSize, "Uint", &ci)
+        DllCall("gdiplus\GdipGetImageEncoders", "uint", nCount, "uint", nSize, Ptr, &ci)
+        if !(nCount && nSize)
+            return -2
 
-        Loop, %nCount%
-        {
-            If !InStr(this._ansi4Unicode(NumGet(ci, 76 * (A_Index - 1) + 44)), "." . sExtTo)
-                Continue
-            pCodec := &ci + 76 * (A_Index - 1)
-            Break
+        If (A_IsUnicode){
+            StrGet_Name := "StrGet"
+            Loop, %nCount%
+            {
+                sString := %StrGet_Name%(NumGet(ci, (idx := (48+7*A_PtrSize)*(A_Index-1))+32+3*A_PtrSize), "UTF-16")
+                if !InStr(sString, "*" Extension)
+                    continue
+
+                pCodec := &ci+idx
+                break
+            }
+        } else {
+            Loop, %nCount%
+            {
+                Location := NumGet(ci, 76*(A_Index-1)+44)
+                nSize := DllCall("WideCharToMultiByte", "uint", 0, "uint", 0, "uint", Location, "int", -1, "uint", 0, "int",  0, "uint", 0, "uint", 0)
+                VarSetCapacity(sString, nSize)
+                DllCall("WideCharToMultiByte", "uint", 0, "uint", 0, "uint", Location, "int", -1, "str", sString, "int", nSize, "uint", 0, "uint", 0)
+                if !InStr(sString, "*" Extension)
+                    continue
+
+                pCodec := &ci+76*(A_Index-1)
+                break
+            }
         }
 
         If !sFileFr
@@ -481,26 +485,27 @@ class CScreenShotTool extends CScreenShotToolModel
             DllCall("gdiplus\GdipLoadImageFromFile", "Uint", this._unicode4Ansi(wFileFr,sFileFr), "UintP", pImage)
         If pImage
         {
-            If sExtTo = jpg
+            Quality := (this.quality < 0) ? 0 : (this.quality > 100) ? 100 : this.quality
+            if Extension in .JPG,.JPEG,.JPE,.JFIF
             {
-                DllCall("gdiplus\GdipGetEncoderParameterListSize", "Uint", pImage, "Uint", pCodec, "UintP", xSize)
-                VarSetCapacity(pi, xSize)
-                DllCall("gdiplus\GdipGetEncoderParameterList", "Uint", pImage, "Uint", pCodec, "Uint", xSize, "Uint", &pi)
-
-                VarSetCapacity(xParam, 4 + 28 + 4)
-
-                xValue := this.quality          ; JPEG Quality: 0 - 100
-                NumPut(1, pi, 28)                  ; number of list
-                ;32 - 48                           ; 16 byte CLSID of Encoder
-                NumPut(1, pi, 48)                  ; number of values
-                NumPut(4, pi, 52)                  ; type of values
-                NumPut(xValue, NumGet(pi,56))      ; address of the value
-                xParam := &pi + 28
+                VarSetCapacity(EncoderParameters, nSize, 0)
+                DllCall("gdiplus\GdipGetEncoderParameterList", Ptr, pImage, Ptr, pCodec, "uint", nSize, Ptr, &EncoderParameters)
+                Loop, % NumGet(EncoderParameters, "UInt")      ;%
+                {
+                    elem := (24+(A_PtrSize ? A_PtrSize : 4))*(A_Index-1) + 4 + (pad := A_PtrSize = 8 ? 4 : 0)
+                    if (NumGet(EncoderParameters, elem+16, "UInt") = 1) && (NumGet(EncoderParameters, elem+20, "UInt") = 6)
+                    {
+                        p := elem+&EncoderParameters-pad-4
+                        NumPut(Quality, NumGet(NumPut(4, NumPut(1, p+0)+20, "UInt")), "UInt")
+                        break
+                    }
+                }
             }
             Else
                 xParam = 0
 
-            DllCall("gdiplus\GdipSaveImageToFile", "Uint", pImage, "Uint", this._unicode4Ansi(wFileTo,sFileTo), "Uint", pCodec, "Uint", xParam), DllCall("gdiplus\GdipDisposeImage", "Uint", pImage)
+            DllCall("gdiplus\GdipSaveImageToFile", "Uint", pImage, "Uint", &sFileTo, "Uint", pCodec, "Uint", xParam)
+            DllCall("gdiplus\GdipDisposeImage", "Uint", pImage)
         }
 
         DllCall("gdiplus\GdiplusShutdown" , "Uint", pToken)
@@ -519,28 +524,23 @@ class CScreenShotTool extends CScreenShotToolModel
         DllCall("CloseClipboard")
     }
 
-    _ansi4Unicode(pString)
-    {
-        nSize := DllCall("WideCharToMultiByte", "Uint", 0, "Uint", 0, "Uint", pString, "int", -1, "Uint", 0, "int",  0, "Uint", 0, "Uint", 0)
-        VarSetCapacity(sString, nSize)
-        DllCall("WideCharToMultiByte", "Uint", 0, "Uint", 0, "Uint", pString, "int", -1, "str", sString, "int", nSize, "Uint", 0, "Uint", 0)
-        Return    sString
-    }
-
     _unicode4Ansi(ByRef wString, sString)
     {
         nSize := DllCall("MultiByteToWideChar", "Uint", 0, "Uint", 0, "Uint", &sString, "int", -1, "Uint", 0, "int", 0)
         VarSetCapacity(wString, nSize * 2)
         DllCall("MultiByteToWideChar", "Uint", 0, "Uint", 0, "Uint", &sString, "int", -1, "Uint", &wString, "int", nSize)
-        Return    &wString
+        Return &wString
     }
 
     _scaleBitmap(hDC, hBM, nW, nH, znW, znH)
     {
-        mDC1 := DllCall("CreateCompatibleDC", "Uint", 0)
-        mDC2 := DllCall("CreateCompatibleDC", "Uint", 0)
-        zhBM := this._createDIBSectionForScreenCapture(mDC2, znW, znH)
-        oBM1 := DllCall("SelectObject", "Uint", mDC1, "Uint",  hBM)
+        WriteDebug("Rescaling from", "w: " nW ", h: " nH, "debug", this.moduleName)
+        WriteDebug("Rescaling to", "w: " znW ", h: " znH, "debug", this.moduleName)
+
+        mDC1 := DllCall("CreateCompatibleDC", "Uint", hDC)
+        mDC2 := DllCall("CreateCompatibleDC", "Uint", hDC)
+        zhBM := DllCall("CreateCompatibleBitmap", "Uint", hDC, "int", znW, "int", znH)
+        oBM1 := DllCall("SelectObject", "Uint", mDC1, "Uint", hBM)
         oBM2 := DllCall("SelectObject", "Uint", mDC2, "Uint", zhBM)
         DllCall("SetStretchBltMode", "Uint", mDC2, "int", 4)
         DllCall("StretchBlt", "Uint", mDC2, "int", 0, "int", 0, "int", znW, "int", znH, "Uint", mDC1, "int", 0, "int", 0, "int", nW, "int", nH, "Uint", 0x00CC0020)
@@ -549,7 +549,7 @@ class CScreenShotTool extends CScreenShotToolModel
         DllCall("DeleteDC", "Uint", mDC1)
         DllCall("DeleteDC", "Uint", mDC2)
         DllCall("DeleteObject", "Uint", hBM)
-        Return    zhBM
+        Return zhBM
     }
 
     _clipBitmap(hDC, hBM, nL, nT, nW, nH)
@@ -572,23 +572,19 @@ class CScreenShotTool extends CScreenShotToolModel
     _captureCursor(hDC, nL, nT)
     {
         WriteDebug("adding cursor to bitmap", "", "debug", this.moduleName)
-        VarSetCapacity(mi, 20, 0)
-        mi := Chr(20)
-        DllCall("GetCursorInfo", "Uint", &mi)
-        bShow := NumGet(mi, 4)
-        hCursor := NumGet(mi, 8)
-        xCursor := NumGet(mi,12)
-        yCursor := NumGet(mi,16)
 
-        VarSetCapacity(ni, 20, 0)
-        DllCall("GetIconInfo", "Uint", hCursor, "Uint", &ni)
-        xHotspot := NumGet(ni, 4)
-        yHotspot := NumGet(ni, 8)
-        hBMMask := NumGet(ni,12)
-        hBMColor := NumGet(ni,16)
+        NumPut(VarSetCapacity(CURSORINFO, A_PtrSize + 16, 0), CURSORINFO, "Uint")
+        DllCall("GetCursorInfo", "ptr", &CURSORINFO)
+        VarSetCapacity(ICONINFO, A_PtrSize * 2 + 12)
+        DllCall("GetIconInfo", "ptr", hCursor := NumGet(CURSORINFO, 8), "ptr", &ICONINFO)
+        if ((hbmColor := NumGet(ICONINFO, A_PtrSize * 2 + 8, "ptr")))
+            DllCall("DeleteObject", "ptr", hbmColor)
+        bShow := NumGet(CURSORINFO, 4, "UInt")
+        x := NumGet(CURSORINFO, 8 + A_PtrSize, "Int") - NumGet(ICONINFO, A_PtrSize, "Uint")
+        y := NumGet(CURSORINFO, 12 + A_PtrSize, "Int") - NumGet(ICONINFO, A_PtrSize + 4, "Uint")
 
-        If bShow
-            DllCall("DrawIcon", "Uint", hDC, "int", xCursor - xHotspot - nL, "int", yCursor - yHotspot - nT, "Uint", hCursor)
+        If (bShow)
+            DllCall("DrawIcon", "Uint", hDC, "Int", x - nL, "Int", y - nT, "Uint", hCursor)
         If hBMMask
             DllCall("DeleteObject", "Uint", hBMMask)
         If hBMColor
@@ -599,7 +595,7 @@ class CScreenShotTool extends CScreenShotToolModel
     {
         DetectHiddenWindows, Off
         WinGet, windowList, List
-        WriteDebug("Refreshing Windows", List, "debug", this.moduleName)
+        WriteDebug("Refreshing Windows", windowList, "debug", this.moduleName)
 
         Loop, %windowList%
         {
@@ -649,10 +645,10 @@ class CScreenShotTool extends CScreenShotToolModel
         get {
             global ScreenShotTool_FileNameType
 
-            If (inArray(["Auto Generated","Follows a Pattern","Prompted"], this._fileNameType))
+            If (inArray(this._fileNameType, ["Auto Generated","Follows a Pattern","Prompted"]))
                 fileNameType := this._fileNameType
 
-            If (!inArray(["Auto Generated","Follows a Pattern","Prompted"], ScreenShotTool_FileNameType))
+            If (!inArray(ScreenShotTool_FileNameType, ["Auto Generated","Follows a Pattern","Prompted"]))
             {
                 fileNameType := this.manifest.findUIElementByKey("name", "ScreenShotTool_FileNameType")
                 fileNameType := fileNameType.items[1]
@@ -663,7 +659,7 @@ class CScreenShotTool extends CScreenShotToolModel
 
         }
         set {
-            If (!inArray(["Auto Generated","Follows a Pattern","Prompted"], value))
+            If (!inArray(value, ["Auto Generated","Follows a Pattern","Prompted"]))
             {
                 fileNameType := this.manifest.findUIElementByKey("name", "ScreenShotTool_FileNameType")
                 return this._fileNameType := fileNameType.items[1]
@@ -716,21 +712,22 @@ class CScreenShotTool extends CScreenShotToolModel
         get {
             global ScreenShotTool_FileFormat
 
-            If (inArray(["png", "jpg", "gif", "tif", "bmp"], this._fileFormat))
+            If (inArray(this._fileFormat, ["png", "jpg", "gif", "tif", "bmp"]))
                 return this._fileFormat
 
-            If (!inArray(["png", "jpg", "gif", "tif", "bmp"], ScreenShotTool_FileFormat))
+            If (inArray(ScreenShotTool_FileFormat, ["png", "jpg", "gif", "tif", "bmp"]))
+            {
+                fileFormat := ScreenShotTool_FileFormat
+            }
+            else
             {
                 fileFormat := this.manifest.findUIElementByKey("name", "ScreenShotTool_FileFormat")
                 fileFormat := fileFormat.items[1]
             }
-            else
-                fileFormat := ScreenShotTool_FileFormat
             return fileFormat
-
         }
         set {
-            If (!inArray(["png", "jpg", "gif", "tif", "bmp"], ScreenShotTool_FileFormat))
+            If (!inArray(this._fileFormat, ["png", "jpg", "gif", "tif", "bmp"]))
             {
                 fileFormat := this.manifest.findUIElementByKey("name", "ScreenShotTool_FileFormat")
                 return this._fileFormat := fileFormat.items[1]
@@ -752,14 +749,14 @@ class CScreenShotTool extends CScreenShotToolModel
 
             ; if fileName[] was already set in instance, use that value
             if (this._fileName) {
-                WriteDebug("Filename was set to: " this._fileName, "debug", this.moduleName)
-                return this._fileName
+                WriteDebug("Filename was set to:", this._fileName, "debug", this.moduleName)
+                fileName := this._fileName
             }
 
             ; decide what method to use for naming the file
             if (this.fileNameType == "Auto Generated") {
-                WriteDebug("Filename is autogenerated", "debug", this.moduleName)
-                return "ScreenShot_" A_Now "." this.fileFormat
+                WriteDebug("Filename is autogenerated", "", "debug", this.moduleName)
+                fileName := "ScreenShot_" A_Now "." this.fileFormat
             }
             else if (this.fileNameType == "Follows a Pattern") {
                 WriteDebug("Filename is generated from pattern", "", "debug", this.moduleName)
@@ -779,17 +776,6 @@ class CScreenShotTool extends CScreenShotToolModel
 
                     fileName := StringReplace(fileName, "\t", screenShotMode, "A")
                 }
-
-                ; did fileName end up empty?
-                if (!fileName) {
-                    WriteDebug("Filename is autogenerated", "debug", this.moduleName)
-                    return "ScreenShot_" A_Now "." this.fileFormat
-                }
-
-                ; remove invalid chars
-                fileName := RegExReplace(fileName, illigalChars,"_")
-
-                return fileName
             } else {
                 global ScreenShotTools_PromptObject
 
@@ -802,11 +788,21 @@ class CScreenShotTool extends CScreenShotToolModel
                 ScreenShotTools_PromptObject.Cancel := true
                 fileName := ScreenShotTools_PromptObject.prompt()
 
-                ; remove invalid chars
-                fileName := RegExReplace(fileName, illigalChars, "_")
-
-                return fileName "." this.fileFormat
+                fileName := fileName "." this.fileFormat
             }
+
+            ; remove invalid chars
+            fileName := RegExReplace(fileName, illigalChars,"_")
+            ; did fileName end up empty?
+            if (!fileName) {
+                WriteDebug("Filename is autogenerated", "", "debug", this.moduleName)
+                fileName := "ScreenShot_" A_Now "." this.fileFormat
+            }
+
+            ; does file already exist?
+            ; TODO
+
+            return fileName
         }
         set {
             return this._fileName := value
@@ -1209,6 +1205,7 @@ class CScreenShotTool extends CScreenShotToolModel
 
         if (this.visualFeedback)
         {
+            WriteDebug("Flashing area:", "x: " nL ", y: " nT ", w: " nW ", h: " nH, "debug", this.moduleName)
             this._flashArea(nL,nT,nW,nH)
         }
     }
@@ -1221,7 +1218,10 @@ class CScreenShotTool extends CScreenShotToolModel
     {
         if (this.audioFeedback)
             IfExist % this.soundFile
+            {
+                WriteDebug("Shutter sound", "", "debug", this.moduleName)
                 SoundPlay, % this.soundFile
+            }
     }
 
     /**
