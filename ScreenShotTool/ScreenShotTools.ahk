@@ -10,6 +10,7 @@
 /**
  * TODO:
  *     * append to name if already exists
+ *     * allow user to select area
  */
 
 /**
@@ -1199,8 +1200,7 @@ class CScreenShotTool extends CScreenShotToolModel
     soundFile[]
     {
         get {
-            ; TODO: must be done better
-            file := A_ScriptDir "\..\modules\ol.modules\ScreenShotTool\resources\cameraShutter.wav"
+            file := a2.path "\" a2.modules "\" this.ModulePack "\" this.ModuleName "\resources\cameraShutter.wav"
             if (FileExist(file))
                 return file
             else
