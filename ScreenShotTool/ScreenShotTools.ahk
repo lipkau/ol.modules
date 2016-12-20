@@ -3,16 +3,12 @@
 ; created: 2016 11 13
 
 #include lib\ahklib\gdip.ahk
-#include lib\ahklib\_Struct.ahk
 #include lib\ahklib\CPrompt.ahk
 #include lib\ahklib\CManifest.ahk
 #include lib\ahklib\CNotification.ahk
-Struct(Structure, pointer:=0, init:=0) {
-    return new _Struct(Structure,pointer,init)
-}
+
 /**
  * TODO:
- *     * cursor?
  *     * append to name if already exists
  */
 
