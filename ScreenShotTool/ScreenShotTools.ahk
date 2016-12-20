@@ -12,11 +12,37 @@
  *     * append to name if already exists
  */
 
+/**
+ * Class for the Module's data
+ * Any class in this module should extend this class
+ */
  class CScreenShotToolModel
  {
-    static moduleBundle, moduleName, moduleHelp
+    /**
+     * Allocate static properties for
+     *     the name of the module
+     *     the name of the module package
+     *     the url to the documentation of this module
+     */
+    static modulePack
+         , moduleName
+         , moduleHelp
+
+    /**
+     * A property with the data from the module's manifest
+     * (./a2module.json)
+     *
+     * @type CManifest
+     */
     static manifest := new CManifest(A_LineFile)
 
+    /**
+     * Constructor
+     *     Populate the module's information properties from the manifest
+     *
+     * When this class is extended by another class, the extendee must
+     * call this (parent) constructor by `this.base.__New()`
+     */
     __New()
     {
         this.modulePack := this.manifest.metaData.package
@@ -31,61 +57,41 @@
  */
 class CScreenShotTool extends CScreenShotToolModel
 {
+    /**
+     * Numeric counter of how many Screenshots have been taken
+     *
+     * This counter is persisted in the a2.db
+     */
     static counter
 
+    /**
+     * Constructor
+     *     Populates the `counter` property from a2.db
+     */
     __New()
     {
-        this.base.__New()
+        this.base.__New()  ; call constructor of parent
         this.Counter := a2.db.get(this.modulePack, this.moduleName, "counter")
         return this
     }
 
+    /**
+     * Destructor
+     */
     __Delete()
-    {
-        ; msgbox % "destructor"
-    }
+    {}
 
     /**
-     * Perform some initial setup when the module is loaded
+     * Module initialization rountine
+     *     Perform some initial setup when the module is loaded
      */
     Init()
     {
+        ; Expose an instance of this class globally.
+        ; Hotkeys should execute mehtods from this instance.
+        ; This ensures the Constructor and Desctructor are
+        ; called correctly.
         global ScreenShotTool := new CScreenShotTool()
-        ; Ensure default values are saved in DB
-        ; inputFields := [
-        ;     , "ScreenShotTool_TargetPath"
-        ;     , "ScreenShotTool_this.fileNameType"
-        ;     , "ScreenShotTool_FileNamePattern"
-        ;     , "ScreenShotTool_FileNamePattern_Time"
-        ;     , "ScreenShotTool_FileFormat"
-        ;     , "ScreenShotTool_Quality"
-        ;     , "ScreenShotTool_Scaling"
-        ;     , "ScreenShotTool_SaveToClipboard"
-        ;     , "ScreenShotTool_CaptureCursor"
-        ;     , "ScreenShotTool_AcusticFeedback"
-        ;     , "ScreenShotTool_VisualFeedback"
-        ;     , "ScreenShotTool_Timer"
-        ;     , "ScreenShotTool_openInManager"
-        ;     , "ScreenShotTool_DisableFontSmoothing"
-        ;     , "ScreenShotTool_DisableClearType"
-        ;     , "ScreenShotTool_CatchContextMenu"
-        ;     , "ScreenShotTool_NoOverlappingWindows"
-        ;     , "ScreenShotTool_DisableTransparency1"
-        ;     , "ScreenShotTool_DisableTransparency2"]
-        ; for i,v in inputFields
-        ; {
-        ;     element := this.manifest.findUIElementByKey("name", v)
-        ;     if (element.typ != "combo")
-        ;         value := element.value
-        ;     else
-        ;         value := element.items[1]
-            ; a2.db.delete(this.modulePack, this.moduleName, v)
-            ; a2.db.set(this.modulePack, this.moduleName, v, value)
-        ; }
-
-        ; a2.db.increment(this.modulePack, this.moduleName, "counter")
-        ; read screenshot counter from DB
-        ; a2.db.delete(this.modulePack, this.moduleName, "counter")
     }
 
     /**
@@ -97,22 +103,25 @@ class CScreenShotTool extends CScreenShotToolModel
     TakeScreenShot(option = "")
     {
         option := option ? option : "All"
-
         WriteDebug("Triggered Screenshot with option:", option, "debug", this.moduleName)
 
         filePath := this.Capture(option)
-
         if (!filePath)
             return ; failed to capture screen. Showing an error must be handled in the Capture() method
 
         Notify("Screenshot captured", "Screenshot was captured and stored.", 2, NotifyIcons.Success)
 
+        ; In case the Screenshot was not saved to a file, `filePath` is true, but not `FileExist(filePath)`
         if ((this.openInManager) && (FileExist(filePath)))
         {
-            ImageConverter := new CImageConverterAction()
-            ImageConverter.Files := filePath
-            ImageConverter.ReuseWindow := true
-            ImageConverter.Execute()
+            if (CImageConverterAction)
+            {
+                ImageConverter := new CImageConverterAction()
+                ImageConverter.Files := filePath
+                ImageConverter.ReuseWindow := true  ; Append Screenshot to already opened GUI
+                ImageConverter.Execute()
+            } else
+                Notify("Failed to open in ImageManager", "ImageManager module is not available.`nPlease activate the module", 3, NotifyIcons.Error)
         }
     }
 
@@ -169,7 +178,6 @@ class CScreenShotTool extends CScreenShotToolModel
         {
             ; Capture FullScreen
             this.screenShotMode := "FullScreen"
-            ; foo := this.CaptureScreen.Exec(, this.captureCursor, , this.quality)
             storedFile := this._captureFromScreen()
         }
         else if (type == "Window")
@@ -221,6 +229,20 @@ class CScreenShotTool extends CScreenShotToolModel
         ; scr_tim_MouseWatch
     }
 
+    /**
+     * Private Method
+     *     Capture a Bitmap of the screen using GDI+
+     *     Draw cursor onto Bitmap
+     *     Resize Bitmap
+     *     Flash the captured are
+     *     Play shuttor sound
+     *     Store Bitmap to a file
+     *     Store Bitmap to the clipboard
+     *
+     * @param   any     aRect       Parameter describing the Area to be captured
+     * @return  string              Name of the file written to disk
+     * @return  int     -1          Screen captured successfully, but no file was written (by user's choice)
+     */
     _captureFromScreen(aRect = 0)
     {
         this._disableFontSmoothing()
@@ -318,7 +340,7 @@ class CScreenShotTool extends CScreenShotToolModel
                 this._captureCursor(mDC, nL, nT)
             DllCall("SelectObject", "Uint", mDC, "Uint", oBM)
             DllCall("DeleteDC", "Uint", mDC)
-            hBM := this._clipBitmap(hDC, hBM, ncL, ncT, ncW, ncH)
+            hBM := this._cropBitmap(hDC, hBM, ncL, ncT, ncW, ncH)
         }
         else
         {
@@ -422,6 +444,16 @@ class CScreenShotTool extends CScreenShotToolModel
         return (this.saveToFile) ? file : -1
     }
 
+    /**
+     * Private Method
+     *     Write Bitmap to file
+     *
+     * @param           sFileFr         File to read the Bitmap from /
+     *                                  handler to the Bitmap in memory /
+     *                                  empty to read from clipboard
+     * @param           sFileTo         Path to the file to be written
+     * @type {String}
+     */
     _storeToFile(sFileFr = "", sFileTo = "")
     {
         WriteDebug("File stored to", sFileTo, "debug", this.moduleName)
@@ -508,6 +540,13 @@ class CScreenShotTool extends CScreenShotToolModel
         DllCall("FreeLibrary", "Uint", hGdiPlus)
     }
 
+    /**
+     * Private Method
+     *     Write Bitmap to Clipboard
+     *
+     * @param   int     hMem            Handler of the Bitmap in memory
+     * @param   int     nFormat
+     */
     _storeToClipboard(hMem, nFormat = 2)
     {
         WriteDebug("Storing bitmap to clipboard", "", "debug", this.moduleName)
@@ -528,6 +567,18 @@ class CScreenShotTool extends CScreenShotToolModel
         Return &wString
     }
 
+    /**
+     * Private Method
+     *     Rescale a Bitmap
+     *
+     * @param   handler     hDC         Device Context of Bitmap
+     * @param   handler     hBM         Bitmap
+     * @param   int         nW          Width of the Bitmap
+     * @param   int         nH          Height of the Bitmap
+     * @param   int         znW         Width to which the Bitmap should be scaled to
+     * @param   int         znH         Height to which the Bitmap should be scaled to
+     * @return  handler
+     */
     _scaleBitmap(hDC, hBM, nW, nH, znW, znH)
     {
         WriteDebug("Rescaling from", "w: " nW ", h: " nH, "debug", this.moduleName)
@@ -548,7 +599,11 @@ class CScreenShotTool extends CScreenShotToolModel
         Return zhBM
     }
 
-    _clipBitmap(hDC, hBM, nL, nT, nW, nH)
+    /**
+     * Private Method
+     *     Crop  a Bitmap
+     */
+    _cropBitmap(hDC, hBM, nL, nT, nW, nH)
     {
         WriteDebug("clipping bitmap", "", "debug", this.moduleName)
         mDC1 := DllCall("CreateCompatibleDC", "Uint", hDC)
@@ -565,6 +620,14 @@ class CScreenShotTool extends CScreenShotToolModel
         Return zhBM
     }
 
+    /**
+     * Private Method
+     *     Draw the cursor onto a Bitmap
+     *
+     * @param   handler     hDC         Device Context
+     * @param   int         nL          Length of the area in the DC
+     * @param   int         nT          Height of the area in the DC
+     */
     _captureCursor(hDC, nL, nT)
     {
         WriteDebug("adding cursor to bitmap", "", "debug", this.moduleName)
@@ -587,6 +650,10 @@ class CScreenShotTool extends CScreenShotToolModel
             DllCall("DeleteObject", "Uint", hBMColor)
     }
 
+    /**
+     * Private Method
+     *     ReDraw Windows in order to refresh Font Smoothing
+     */
     _refreshWindows()
     {
         DetectHiddenWindows, Off
@@ -600,6 +667,10 @@ class CScreenShotTool extends CScreenShotToolModel
         }
     }
 
+    /**
+     * Private Method
+     *     Enable FontSmoothing and ClearType
+     */
     _enableFontSmoothing()
     {
         If ((this.disableFontSmoothing) AND (this._originalFontSmoothing)) {
@@ -612,6 +683,11 @@ class CScreenShotTool extends CScreenShotToolModel
         }
     }
 
+    /**
+     * Private Method
+     *     Disable FontSmoothing and ClearType
+     *     according to user's choice
+     */
     _disableFontSmoothing()
     {
         If (this.disableFontSmoothing) {
@@ -636,6 +712,11 @@ class CScreenShotTool extends CScreenShotToolModel
         }
     }
 
+    /**
+     * Property describing what type of FileName the user chose
+     *
+     * @type enum("Auto Generated","Follows a Pattern","Prompted")
+     */
     fileNameType[]
     {
         get {
@@ -665,6 +746,12 @@ class CScreenShotTool extends CScreenShotToolModel
         }
     }
 
+    /**
+     * Property describing the pattern to be used in the FileName
+     * Only applies if `fileNameType == "Follows a Pattern"`
+     *
+     * @type string
+     */
     fileNamePattern[]
     {
         get {
@@ -684,6 +771,12 @@ class CScreenShotTool extends CScreenShotToolModel
         }
     }
 
+    /**
+     * Property describing the DateTime format to be used in `fileNamePattern`
+     * Only applies if `fileNameType == "Follows a Pattern"`
+     *
+     * @type string
+     */
     timePattern[]
     {
         get {
@@ -703,6 +796,11 @@ class CScreenShotTool extends CScreenShotToolModel
         }
     }
 
+    /**
+     * Property describing the format of the FileName
+     *
+     * @type enum("png", "jpg", "gif", "tif", "bmp")
+     */
     fileFormat[]
     {
         get {
@@ -862,6 +960,11 @@ class CScreenShotTool extends CScreenShotToolModel
         }
     }
 
+    /**
+     * Property for wheter the image should be saved to a file
+     *
+     * @type boolean
+     */
     saveToFile[]
     {
         get {
@@ -876,6 +979,11 @@ class CScreenShotTool extends CScreenShotToolModel
         }
     }
 
+    /**
+     * Property for wheter the FontSmoothing should be disabled before capturing the screen
+     *
+     * @type boolean
+     */
     disableFontSmoothing[]
     {
         get {
@@ -890,6 +998,11 @@ class CScreenShotTool extends CScreenShotToolModel
         }
     }
 
+    /**
+     * Property for wheter the ClearType shoule be disabled before capturing the screen
+     *
+     * @type boolean
+     */
     disableClearType[]
     {
         get {
@@ -904,6 +1017,11 @@ class CScreenShotTool extends CScreenShotToolModel
         }
     }
 
+    /**
+     * Property for the JPEG quality with which a file should be saved as
+     *
+     * @type int
+     */
     quality[]
     {
         get {
@@ -911,13 +1029,13 @@ class CScreenShotTool extends CScreenShotToolModel
 
            if (this._quality)
                return this._quality
-           else if (IsNumeric(ScreenShotTool_Quality))
+           else if (IsNumeric(ScreenShotTool_Quality) && value >= 0 && value <= 100)
                return ScreenShotTool_Quality
            else
                return this.manifest.findUIElementByKey("name", "ScreenShotTool_Quality")
        }
        set {
-           if (IsNumeric(value))
+           if (IsNumeric(value) && value >= 0 && value <= 100)
                return this._quality := value
            else
                return this._quality := this.manifest.findUIElementByKey("name", "ScreenShotTool_Quality")
@@ -981,6 +1099,11 @@ class CScreenShotTool extends CScreenShotToolModel
         }
     }
 
+    /**
+     * Property for whether a Windows ContextMenu should be capture
+     *
+     * @type bool
+     */
     catchContextMenu[]
     {
         get {
@@ -1085,6 +1208,11 @@ class CScreenShotTool extends CScreenShotToolModel
         }
     }
 
+    /**
+     * Property for whether the cursor should be visibile in the screenshot
+     *
+     * @type bool
+     */
     captureCursor[]
     {
         get {
@@ -1184,10 +1312,12 @@ class CScreenShotTool extends CScreenShotToolModel
     }
 
     /**
-     * Private Method
-     * Wrapper for conditional flashing
+     * Flash a specific area of the screen
      *
-     * TODO: make flash only affect area that was captured
+     * @param   int     nL      Coordinates for the Left corner of the area
+     * @param   int     nT      Coordinates for the Top corner of the area
+     * @param   int     nW      Width of the area
+     * @param   int     nW      Height of the area
      */
     Flash(nL, nT, nW, nH)
     {
@@ -1207,8 +1337,7 @@ class CScreenShotTool extends CScreenShotToolModel
     }
 
     /**
-     * Private Method
-     * Wrapper for conditional shutter
+     * Play a shutter sound effect
      */
     Shutter()
     {
