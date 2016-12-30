@@ -63,7 +63,11 @@ class CScreenShotTool extends CScreenShotToolModel
      *
      * This counter is persisted in the a2.db
      */
-    static counter
+    static Counter
+
+    static WinDelay := 0
+
+    static POINT := "Long x,Long y"
 
     /**
      * Constructor
@@ -223,12 +227,113 @@ class CScreenShotTool extends CScreenShotToolModel
 
     SelectArea()
     {
+        static scr_Pic, frameInfo, scr_ShowToolBar, ScreenShotsFrameGuiOk
         ; TODO:
         ; scr_sub_Hotkey_Interactive
         ; scr_sub_GetFrameBounds
         ; scr_sub_MoveWithKeys
         ; scr_tim_MouseWatch
+        ; scr_RefreshToolBar
+        Critical
+        GetVirtualScreenCoordinates(MonitorAreaLeft, MonitorAreaTop, MonitorAreaWidth, MonitorAreaHeight)
+
+        if ((this.disableTransperancy1) OR (this.disableTransperancy2)) {
+            ; Take a Screenshot and store it in temp folder
+            this.fileName       := A_Temp "\__a2_scr_tmpShot.bmp"
+            visualFeedback      := this.visualFeedback, this.visualFeedback := false
+            audioFeedback       := this.audioFeedback,  this.audioFeedback  := false
+
+            FileDelete % this.fileName
+            this._captureFromScreen()
+
+            this.fileName       := ""
+            this.visualFeedback := visualFeedback
+            this.audioFeedback  := audioFeedback
+        }
+        DetectHiddenWindows, Off
+
+        SetWinDelay % this.WinDelay
+        WinGet, scr_LastActiveApp, ID, A  ; INFO IS NOT USED
+
+        ; this._disableFontSmoothing()
+
+        ; Create the overlay GUI
+        this.tmpGuiHidden := GetFreeGUINum(10)
+        Gui % this.tmpGuiHidden ": Default"
+        Gui, -Caption -Border +ToolWindow -Resize +Disabled +LastFound ; +AlwaysOnTop
+        if ((!this.disableTransperancy2) AND (!this.disableTransperancy1)) {
+            ; Create a white overlay
+            Gui, Color, FFFFFF
+            Gui, Add, Button, gScreenShotsHiddenGuiOk x-20 y-20 w1 h1 Default, OK  ; TODO
+            WinSet, Transparent, 1
+        } else {
+            ; Create a GUI with a screenshot of the screen as background to improve performance
+            Gui, Add, Picture, AltSubmit gscr_TakeScreenshot vscr_Pic w%MonitorAreaWidth% h%MonitorAreaHeight% x%MonitorAreaLeft% y%MonitorAreaTop%, % A_Temp "\__a2_scr_tmpShot.bmp" ; TODO
+            Gui, Add, Button, gScreenShotsHiddenGuiOk x-20 y-20 w1 h1 Default, OK  ; TODO
+        }
+        Gui, Show, w%MonitorAreaWidth% h%MonitorAreaHeight% x%MonitorAreaLeft% y%MonitorAreaTop%, Area ScreenShot
+
+        if (scr_RememberSelection = 1) {  ; TODO
+            ; TODO: GET LAST AREA COORDS
+            ; IniRead, this.coordsX1, %ConfigFile%, %scr_ScriptName%, SelectionX1, 0
+            ; IniRead, this.coordsY1, %ConfigFile%, %scr_ScriptName%, SelectionY1, 0
+            ; IniRead, this.coordsX2, %ConfigFile%, %scr_ScriptName%, SelectionX2, 0
+            ; IniRead, this.coordsY2, %ConfigFile%, %scr_ScriptName%, SelectionY2, 0
+            scr_SelectionRegionX1 := this.coordsX1+(0-MonitorAreaLeft)
+            ; scr_SelectionRegionY1 := this.coordsY1+(0-MonitorAreaTop)
+            ; scr_SelectionRegionX2 := this.coordsX2+(0-MonitorAreaLeft)
+            ; scr_SelectionRegionY2 := this.coordsY2+(0-MonitorAreaTop)
+        } else {
+            this.coordsX1 := 0
+            this.coordsY1 := 0
+            this.coordsX2 := 0
+            this.coordsY2 := 0
+        }
+
+        ; TODO: WHAT DOES THIS DO?
+        ; if (!this.disableTransparency2) {
+        ;     this.tmpGuiDim := GetFreeGUINum(10)
+        ;     Gui % this.tmpGuiDim ": Default"
+        ;     Gui, -Caption -Border +ToolWindow -Resize +Disabled +LastFound ; +AlwaysOnTop
+        ;     Gui, Color, 000000
+        ;     Gui, Add, Button, gScreenShotsDimGuiOk x-20 y-20 w1 h1 Default, OK  ; TODO
+        ;     WinGet, GuiID, ID   ; IS SAME AS this.tmpGuiDim ?
+        ;     WinSet, Transparent, 128  ; TODO
+        ;     WinSet, Region, 0-0 %MonitorAreaWidth%-0 %MonitorAreaWidth%-%MonitorAreaHeight% 0-%MonitorAreaHeight% 0-0 %scr_SelectionRegionX1%-%scr_SelectionRegionY1% %scr_SelectionRegionX2%-%scr_SelectionRegionY1% %scr_SelectionRegionX2%-%scr_SelectionRegionY2% %scr_SelectionRegionX1%-%scr_SelectionRegionY2% %scr_SelectionRegionX1%-%scr_SelectionRegionY1%, ahk_id %GuiID%  ; TODO
+        ;     Gui, Show, w%MonitorAreaWidth% h%MonitorAreaHeight% x%MonitorAreaLeft% y%MonitorAreaTop%, Area ScreenShot
+        ; }
+
+        selectionWidth  := Abs(this.coordsX2-this.coordsX1)
+        selectionHeight := Abs(this.coordsY2-this.coordsY1)
+
+        this.tmpGuiFrame := GetFreeGUINum(10)
+        Gui % this.tmpGuiFrame ": Default"
+        Gui, -Caption -Border +ToolWindow +Resize +MaxSize64000x64000 +Theme +LastFound ; +AlwaysOnTop
+        Gui, Font, s14 c000000 bold, MS Sans Serif
+        Gui, Add, CheckBox, x3 y3 +0x400 w%selectionWidth% R2 vframeInfo Checked0 Hidden
+        Gui, Font
+        Gui, Add, Button, % "x" selectionWidth-105 " y" selectionHeight-25 " gscr_sub_Toolbar w100 vscr_ShowToolBar", %lng_scr_Toolbar%  ; TODO
+        Gui, Color, f1f1f1
+        WinSet, TransColor, f1f1f1
+        Gui, Add, Button, vScreenShotsFrameGuiOk gScreenShotsFrameGuiOk x-20 y-20 w1 h1 Default, OK  ; TODO
+        ; func_AddMessage(0x100,"scr_sub_MoveWithKeys")  ; TODO
+        ; func_AddMessage(0x101,"GuiTooltipKey")         ; TODO
+        ; func_AddMessage(0x200, "GuiTooltip")           ; TODO
+        ; func_AddMessage(0x202, "GuiTooltipKey")        ; TODO
+        ; func_AddMessage(0x6, "RemoveGuiTooltip")       ; TODO
     }
+
+        ; this._enableFontSmoothing()
+
+        ; Gosub, scr_sub_GetFrameBounds   ; TODO
+
+        ; if scr_AutoShowToolbar = 1  ; TODO
+        ;     Gosub, scr_sub_Toolbar  ; TODO
+
+        ; scr_HelperID := GuiDefault("ScreenShotsHelper", "+AlwaysOnTop -Caption -Border +ToolWindow -Resize -0x40000")  ; TODO
+        ; Gui, Add, Button, gScreenShotsDimGuiOk x-20 y-20 w1 h1 Default, OK  ; TODO
+        ; Gui, Show, w0 h0 x0 y0,aadScreenShots  ; TODO
+    ; }
 
     /**
      * Private Method
@@ -633,15 +738,30 @@ class CScreenShotTool extends CScreenShotToolModel
     {
         WriteDebug("adding cursor to bitmap", "", "debug", this.moduleName)
 
-        NumPut(VarSetCapacity(CURSORINFO, A_PtrSize + 16, 0), CURSORINFO, "Uint")
-        DllCall("GetCursorInfo", "ptr", &CURSORINFO)
-        VarSetCapacity(ICONINFO, A_PtrSize * 2 + 12)
-        DllCall("GetIconInfo", "ptr", hCursor := NumGet(CURSORINFO, 8), "ptr", &ICONINFO)
-        if ((hbmColor := NumGet(ICONINFO, A_PtrSize * 2 + 8, "ptr")))
-            DllCall("DeleteObject", "ptr", hbmColor)
-        bShow := NumGet(CURSORINFO, 4, "UInt")
-        x := NumGet(CURSORINFO, 8 + A_PtrSize, "Int") - NumGet(ICONINFO, A_PtrSize, "Uint")
-        y := NumGet(CURSORINFO, 12 + A_PtrSize, "Int") - NumGet(ICONINFO, A_PtrSize + 4, "Uint")
+        ; NumPut(VarSetCapacity(CURSORINFO, A_PtrSize + 16, 0), CURSORINFO, "Uint")
+        ; DllCall("GetCursorInfo", "ptr", &CURSORINFO)
+        ; VarSetCapacity(ICONINFO, A_PtrSize * 2 + 12)
+        ; DllCall("GetIconInfo", "ptr", hCursor := NumGet(CURSORINFO, 8), "ptr", &ICONINFO)
+        ; if ((hbmColor := NumGet(ICONINFO, A_PtrSize * 2 + 8, "ptr")))
+        ;     DllCall("DeleteObject", "ptr", hbmColor)
+        ; bShow := NumGet(CURSORINFO, 4, "UInt")
+        ; x := NumGet(CURSORINFO, 8 + A_PtrSize, "Int") - NumGet(ICONINFO, A_PtrSize, "Uint")
+        ; y := NumGet(CURSORINFO, 12 + A_PtrSize, "Int") - NumGet(ICONINFO, A_PtrSize + 4, "Uint")
+
+        cursorinfo := new _Struct("DWORD cbSize, DWORD flags, HCURSOR hCursor, CScreenShotTool.POINT ptScreenPos")
+        cursorinfo.cbSize:=sizeof(cursorinfo)
+
+        iconinfo := new _Struct("BOOL fIcon, DWORD xHotspot, DWORD yHotspot, HBITMAP hbmMask, HBITMAP hbmColor")
+        ; iconinfo.cbSize:=sizeof(iconinfo)
+
+        DllCall("GetCursorInfo", "Ptr", cursorinfo[])
+        MsgBox % "cbSize:`t`t`t"         cursorinfo.cbSize        "`n"
+               . "flags:`t`t`t"          cursorinfo.flags         "`n"
+               . "hCursor:`t`t`t"        cursorinfo.hCursor       "`n"
+               . "x-coordinate:`t`t"     cursorinfo.ptScreenPos.x "`n"
+               . "y-coordinate:`t`t"     cursorinfo.ptScreenPos.y "`n"
+               . "y-coordinate:`t`t"     iconinfo.xHotspot "`n"
+               . "y-coordinate:`t`t"     iconinfo.yHotspot "`n"
 
         If (bShow)
             DllCall("DrawIcon", "Uint", hDC, "Int", x - nL, "Int", y - nT, "Uint", hCursor)
@@ -1241,6 +1361,34 @@ class CScreenShotTool extends CScreenShotToolModel
         }
     }
 
+    disableTransperancy1[]
+    {
+        get {
+            global ScreenShotTool_DisableTransparency1
+            if (this._disableTransperancy1)
+                return this._disableTransperancy1
+            else
+                return (ScreenShotTool_DisableTransparency1 == true) ? true : false
+        }
+        set {
+            return this._disableTransperancy1 := (value == true) ? true : false
+        }
+    }
+
+    disableTransperancy2[]
+    {
+        get {
+            global ScreenShotTool_DisableTransparency2
+            if (this._disableTransperancy2)
+                return this._disableTransperancy2
+            else
+                return (ScreenShotTool_DisableTransparency2 == true) ? true : false
+        }
+        set {
+            return this._disableTransperancy2 := (value == true) ? true : false
+        }
+    }
+
     class cCursor
     {
         static pAppstarting := 32650
@@ -1382,3 +1530,19 @@ class CScreenShotTool extends CScreenShotToolModel
         this.Remove("tmpGuiNum")
     }
 }
+
+ScreenShotsHiddenGuiOk:
+msgbox % "bar"
+return
+scr_TakeScreenshot:
+msgbox % "foo"
+return
+ScreenShotsDimGuiOk:
+msgbox % "r u lost?"
+return
+scr_sub_Toolbar:
+msgbox % "what now?"
+return
+ScreenShotsFrameGuiOk:
+msgbox % "I am running out of dummy text"
+return
