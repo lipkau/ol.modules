@@ -11,52 +11,13 @@
  * TODO:
  *     * append to name if already exists
  *     * allow user to select area
+ *     * fix prompt
  */
-
-/**
- * Class for the Module's data
- * Any class in this module should extend this class
- */
- class CScreenShotToolModel
- {
-    /**
-     * Allocate static properties for
-     *     the name of the module
-     *     the name of the module package
-     *     the url to the documentation of this module
-     */
-    static modulePack
-         , moduleName
-         , moduleHelp
-
-    /**
-     * A property with the data from the module's manifest
-     * (./a2module.json)
-     *
-     * @type CManifest
-     */
-    static manifest := new CManifest(A_LineFile)
-
-    /**
-     * Constructor
-     *     Populate the module's information properties from the manifest
-     *
-     * When this class is extended by another class, the extendee must
-     * call this (parent) constructor by `this.base.__New()`
-     */
-    __New()
-    {
-        this.modulePack := this.manifest.metaData.package
-        this.moduleName := this.manifest.metaData.name
-        this.moduleHelp := this.manifest.metaData.url
-        return this
-    }
- }
 
 /**
  * Class to manage the ScreenShot behavior
  */
-class CScreenShotTool extends CScreenShotToolModel
+class CScreenShotTool extends ModuleModel
 {
     /**
      * Numeric counter of how many Screenshots have been taken
@@ -75,8 +36,9 @@ class CScreenShotTool extends CScreenShotToolModel
      */
     __New()
     {
-        this.base.__New()  ; call constructor of parent
-        this.Counter := a2.db.get(this.modulePack, this.moduleName, "counter")
+        this.base.__New(A_LineFile)  ; call constructor of parent
+        ; WinWaitClose % "ahk_id " ObjTree({this: this}, "InspectObject")
+        ; this.Counter := a2.db.get(this.moduleSource, this.moduleName, "counter")
         return this
     }
 
@@ -535,7 +497,7 @@ class CScreenShotTool extends CScreenShotToolModel
         this.Flash(nL,nT,nW,nH)
         this.Shutter()
 
-        this.counter := a2.db.increment(this.modulePack, this.moduleName, "counter")
+        this.counter := a2.db.increment(this.moduleSource, this.moduleName, "counter")
         file := this.targetPath "\" this.filename
         If (this.saveToClipboard)
             this._storeToClipboard(hBM)
@@ -738,30 +700,30 @@ class CScreenShotTool extends CScreenShotToolModel
     {
         WriteDebug("adding cursor to bitmap", "", "debug", this.moduleName)
 
-        ; NumPut(VarSetCapacity(CURSORINFO, A_PtrSize + 16, 0), CURSORINFO, "Uint")
-        ; DllCall("GetCursorInfo", "ptr", &CURSORINFO)
-        ; VarSetCapacity(ICONINFO, A_PtrSize * 2 + 12)
-        ; DllCall("GetIconInfo", "ptr", hCursor := NumGet(CURSORINFO, 8), "ptr", &ICONINFO)
-        ; if ((hbmColor := NumGet(ICONINFO, A_PtrSize * 2 + 8, "ptr")))
-        ;     DllCall("DeleteObject", "ptr", hbmColor)
-        ; bShow := NumGet(CURSORINFO, 4, "UInt")
-        ; x := NumGet(CURSORINFO, 8 + A_PtrSize, "Int") - NumGet(ICONINFO, A_PtrSize, "Uint")
-        ; y := NumGet(CURSORINFO, 12 + A_PtrSize, "Int") - NumGet(ICONINFO, A_PtrSize + 4, "Uint")
+        NumPut(VarSetCapacity(CURSORINFO, A_PtrSize + 16, 0), CURSORINFO, "Uint")
+        DllCall("GetCursorInfo", "ptr", &CURSORINFO)
+        VarSetCapacity(ICONINFO, A_PtrSize * 2 + 12)
+        DllCall("GetIconInfo", "ptr", hCursor := NumGet(CURSORINFO, 8), "ptr", &ICONINFO)
+        if ((hbmColor := NumGet(ICONINFO, A_PtrSize * 2 + 8, "ptr")))
+            DllCall("DeleteObject", "ptr", hbmColor)
+        bShow := NumGet(CURSORINFO, 4, "UInt")
+        x := NumGet(CURSORINFO, 8 + A_PtrSize, "Int") - NumGet(ICONINFO, A_PtrSize, "Uint")
+        y := NumGet(CURSORINFO, 12 + A_PtrSize, "Int") - NumGet(ICONINFO, A_PtrSize + 4, "Uint")
 
-        cursorinfo := new _Struct("DWORD cbSize, DWORD flags, HCURSOR hCursor, CScreenShotTool.POINT ptScreenPos")
-        cursorinfo.cbSize:=sizeof(cursorinfo)
+        ; cursorinfo := new _Struct("DWORD cbSize, DWORD flags, HCURSOR hCursor, CScreenShotTool.POINT ptScreenPos")
+        ; cursorinfo.cbSize:=sizeof(cursorinfo)
 
-        iconinfo := new _Struct("BOOL fIcon, DWORD xHotspot, DWORD yHotspot, HBITMAP hbmMask, HBITMAP hbmColor")
-        ; iconinfo.cbSize:=sizeof(iconinfo)
+        ; iconinfo := new _Struct("BOOL fIcon, DWORD xHotspot, DWORD yHotspot, HBITMAP hbmMask, HBITMAP hbmColor")
+        ; ; iconinfo.cbSize:=sizeof(iconinfo)
 
-        DllCall("GetCursorInfo", "Ptr", cursorinfo[])
-        MsgBox % "cbSize:`t`t`t"         cursorinfo.cbSize        "`n"
-               . "flags:`t`t`t"          cursorinfo.flags         "`n"
-               . "hCursor:`t`t`t"        cursorinfo.hCursor       "`n"
-               . "x-coordinate:`t`t"     cursorinfo.ptScreenPos.x "`n"
-               . "y-coordinate:`t`t"     cursorinfo.ptScreenPos.y "`n"
-               . "y-coordinate:`t`t"     iconinfo.xHotspot "`n"
-               . "y-coordinate:`t`t"     iconinfo.yHotspot "`n"
+        ; DllCall("GetCursorInfo", "Ptr", cursorinfo[])
+        ; MsgBox % "cbSize:`t`t`t"         cursorinfo.cbSize        "`n"
+        ;        . "flags:`t`t`t"          cursorinfo.flags         "`n"
+        ;        . "hCursor:`t`t`t"        cursorinfo.hCursor       "`n"
+        ;        . "x-coordinate:`t`t"     cursorinfo.ptScreenPos.x "`n"
+        ;        . "y-coordinate:`t`t"     cursorinfo.ptScreenPos.y "`n"
+        ;        . "y-coordinate:`t`t"     iconinfo.xHotspot "`n"
+        ;        . "y-coordinate:`t`t"     iconinfo.yHotspot "`n"
 
         If (bShow)
             DllCall("DrawIcon", "Uint", hDC, "Int", x - nL, "Int", y - nT, "Uint", hCursor)
@@ -1153,7 +1115,7 @@ class CScreenShotTool extends CScreenShotToolModel
            else if (IsNumeric(ScreenShotTool_Quality) && value >= 0 && value <= 100)
                return ScreenShotTool_Quality
            else
-               return this.manifest.findUIElementByKey("name", "ScreenShotTool_Quality")
+               return (this.manifest.findUIElementByKey("name", "ScreenShotTool_Quality")).value
        }
        set {
            if (IsNumeric(value) && value >= 0 && value <= 100)
@@ -1174,7 +1136,7 @@ class CScreenShotTool extends CScreenShotToolModel
             global ScreenShotTool_TargetPath
 
             if (this._targetPath)
-                targetPath := this.targetPath
+                targetPath := this._targetPath
             else if (ScreenShotTool_TargetPath)
                 targetPath := ScreenShotTool_TargetPath
             else
@@ -1320,7 +1282,7 @@ class CScreenShotTool extends CScreenShotToolModel
     soundFile[]
     {
         get {
-            file := a2.path "\" a2.modules "\" this.ModulePack "\" this.ModuleName "\resources\cameraShutter.wav"
+            file := this.modulePath "\resources\cameraShutter.wav"
             if (FileExist(file))
                 return file
             else
