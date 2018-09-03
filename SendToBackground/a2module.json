@@ -1,0 +1,94 @@
+﻿[
+  {
+    "author": "Oliver Lipkau",
+    "date": "2018 9 3",
+    "description": "Send a command to a window in the background",
+    "tags": [
+      "window"
+    ],
+    "typ": "nfo",
+    "url": "https://github.com/lipkau/ol.modules/wiki/SendToBackground",
+    "version": "0.1"
+  },
+  {
+    "file": "SendToBackground.ahk",
+    "typ": "include"
+  },
+  {
+    "code": "SendToBackground.Init()",
+    "typ": "init"
+  },
+  {
+    "children": [
+      {
+        "label": "Command to send",
+        "name": "SendToBackground_Command",
+        "password_mode": false,
+        "typ": "string",
+        "value": "%clipboard%{enter}"
+      },
+      {
+        "disablable": false,
+        "enabled": true,
+        "functionCode": "SendToBackground.Trigger()",
+        "functionMode": 0,
+        "key": [
+          "Lctrl+B"
+        ],
+        "keyChange": true,
+        "label": "Trigger command",
+        "multiple": true,
+        "name": "SendToBackground_HotkeyTrigger",
+        "scopeChange": false,
+        "typ": "hotkey"
+      },
+      {
+        "disablable": false,
+        "enabled": true,
+        "functionCode": "SendToBackground.SetTarget()",
+        "functionMode": 0,
+        "key": [
+          "Lwin+F9"
+        ],
+        "keyChange": true,
+        "label": "Set target window",
+        "multiple": true,
+        "name": "SendToBackground_HotkeySetTarget",
+        "scopeChange": false,
+        "typ": "hotkey"
+      }
+    ],
+    "disablable": false,
+    "enabled": true,
+    "label": "",
+    "name": "SendToBackground_GroupBox",
+    "typ": "group"
+  },
+  {
+    "children": [
+      {
+        "label": "Enabled",
+        "name": "SendToBackground_CheckBoxContinuously",
+        "typ": "check",
+        "value": false
+      },
+      {
+        "decimals": 1,
+        "label": "Interval (in seconds)",
+        "max": 100.0,
+        "min": 0.0,
+        "name": "SendToBackground_Interval",
+        "slider": true,
+        "step_len": 1.0,
+        "suffix": "",
+        "typ": "number",
+        "value": 0.0
+      }
+    ],
+    "disablable": false,
+    "enabled": true,
+    "label": "Send command continuously",
+    "name": "SendToBackground_GroupContinuously",
+    "typ": "group"
+  }
+]

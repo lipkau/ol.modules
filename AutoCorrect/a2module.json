@@ -1,8 +1,9 @@
-[
+﻿[
   {
     "author": "Oliver Lipkau",
     "date": "2016 11 21",
     "description": "Because none existed before this temporary description was created for \"AutoCorrect\". Change it to describe what it does with a couple of words.",
+    "tags": [],
     "typ": "nfo",
     "url": "https://github.com/lipkau/ol.modules/wiki/AutoCorrect",
     "version": "0.1"
