@@ -13,13 +13,20 @@ class SendToBackground extends ModuleModel
     static TargetWindow := ""
 
     /**
+     * property to track if a continuouse job is running
+     */
+    static isRunning := False
+
+    /**
      * Method to initialize the module
      */
     Init()
     {
         this.base.__New(A_LineFile)
 
-        ; Only debug message
+        this.isRunning := False
+        this.timer := ObjBindMethod(this, "SendCommand")
+
         WriteDebug("Initializing module", "", "i", this.moduleName)
     }
 
@@ -67,17 +74,41 @@ class SendToBackground extends ModuleModel
             return
         }
 
-        MsgBox, % "Hurray"
         if (this._continuously)
         {
-            ; loop
-                ; ControlSend, , % this.command, ahk_pid % this.TargetWindow
-                ; sleep this._interval
+            interval := (this._interval) ? this._interval * 1000 : 50
+
+            if (!this.isRunning)
+            {
+                timer := this.timer
+                this.isRunning := True
+                SetTimer % timer, % interval
+            }
+            else
+            {
+                timer := this.timer
+                this.isRunning := False
+                SetTimer % timer, Off
+            }
         }
         else
         {
-            ; ControlSend, , % this.command, ahk_pid % this.TargetWindow
+            this.SendCommand()
         }
+    }
+
+    /**
+     * Method for sending the command
+     * This can be used directly, or invoking with SetTimer
+     */
+    SendCommand()
+    {
+        _command := this._command
+        _target := this.TargetWindow
+
+        Transform, _command, deref, %_command%
+
+        ControlSend, , %_command%, ahk_pid %_target%
     }
 
     /**
@@ -94,14 +125,26 @@ class SendToBackground extends ModuleModel
         }
     }
 
+    /**
+     * Private Property
+     *     If the command should be send repeatedly until trigger is toggled
+     *
+     * @type  bool
+     */
     _continuously[]
     {
         get {
-            global SendToBackground_Continuously
-            return SendToBackground_Continuously
+            global SendToBackground_CheckBoxContinuously
+            return SendToBackground_CheckBoxContinuously
         }
     }
 
+    /**
+     * Private Property
+     *     Interval (in seconds) between one repetition and the next
+     *
+     * @type  integer
+     */
     _interval[]
     {
         get {
