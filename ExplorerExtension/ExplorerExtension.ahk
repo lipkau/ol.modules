@@ -470,7 +470,7 @@ Class CExplorerHistory extends CQueue
    ; Puts an item in the queue
    Push(item)
    {
-       WriteDebug("Pusinhing item to Queue", item)
+       WriteDebug("Pusinhing item to Queue", item, "debug", "ExplorerExtension")
        itemPosition := this.IndexOfEqual(item, 0, "Path")
        if (!itemPosition)
        {
@@ -520,7 +520,7 @@ RegisterExplorerWindows()
 {
    global ExplorerWindows
    ; for item in ComObjCreate("Shell.Application").Windows
-   ; ComObjConnect(item, "Explorer")
+       ; ComObjConnect(item, "Explorer")
    ; ShellWindows := ComObjCreate("Shell.Application").Windows
    ; ComObjConnect(ShellWindows, "Explorer")
    WinGet, hWndList, List, ahk_group ExplorerGroup
@@ -557,20 +557,20 @@ RegisterSelectionChangedEvents()
    {
        ExplorerWindow := ExplorerWindows.GetItemWithValue("hWnd",hwnd)
        if (!IsObject(ExplorerWindow.Selection.History))
-       WriteDebug("Explorer window " hwnd " is not registered!")
+       WriteDebug("Explorer window " hwnd " is not registered!", "", "debug", "ExplorerExtension")
        if (ExplorerWindow.Selection.History.MaxIndex() > 1)
        {
-           WriteDebug("Explorer window " hwnd "restore selecion")
+           WriteDebug("Explorer window " hwnd "restore selecion", "", "debug", "ExplorerExtension")
            Selection := ExplorerWindow.Selection.History[ExplorerWindow.Selection.History.MaxIndex() - 1]
            ; A SelectionChanged event will be fired 2 times that needs to be suppressed?
            ; Why is it fired 2 times instead of one time for each file? -> Probably because of timing
            ExplorerWindow.Selection.IgnoreNextEvent := 2
-           WriteDebug("Explorer window " hwnd " expecting " ExplorerWindow.Selection.IgnoreNextEvent " selection events.")
+           WriteDebug("Explorer window " hwnd " expecting " ExplorerWindow.Selection.IgnoreNextEvent " selection events.", "", "debug", "ExplorerExtension")
            Navigation.SelectFiles(Selection, hwnd)
            ExplorerWindow.Selection.History.Delete(ExplorerWindow.Selection.History.MaxIndex())
        }
        else
-       WriteDebug("Explorer window " hwnd " is registered but has no history")
+       WriteDebug("Explorer window " hwnd " is registered but has no history", "", "debug", "ExplorerExtension")
    }
 }
 
@@ -675,7 +675,7 @@ ExplorerPathChanged(ExplorerWindow)
        if (!ExplorerWindow)
        return
    }
-   WriteDebug("path change")
+   WriteDebug("path change", "", "debug", "ExplorerExtension")
    OldPath := ExplorerWindow.Path
    ExplorerWindow.RegisterSelectionChangedEvent() ;This will also refresh the path in ExplorerWindow
    Path := ExplorerWindow.Path
@@ -683,7 +683,7 @@ ExplorerPathChanged(ExplorerWindow)
    return
    ExplorerWindow.DisplayName := Navigation.GetDisplayName(ExplorerWindow.hwnd)
 
-   WriteDebug("change from " oldpath " to " path)
+   WriteDebug("change from " oldpath " to " path, "", "debug", "ExplorerExtension")
    Entry := RichObject()
    Entry.Path := Path
    Entry.Usage := 0

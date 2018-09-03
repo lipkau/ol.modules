@@ -5,5 +5,6 @@
     "maintainer": "oliver",
     "maintainer_at": "lipkau.net",
     "url": "https://github.com/lipkau/ol.modules",
-    "version": "0.0.1",
+    "update_url": "https://github.com/lipkau/ol.modules",
+    "version": "0.0.1"
 }

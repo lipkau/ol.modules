@@ -16,7 +16,7 @@
     "enabled": true,
     "functionCode": "urlShortener.Execute()",
     "functionMode": 0,
-    "key": "Win+G",
+    "key": "Win+S",
     "keyChange": true,
     "label": "Hotkey to shorten a URL",
     "mode": "ahk",

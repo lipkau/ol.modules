@@ -14,9 +14,9 @@ BlockCapsLock_callback()
     if ErrorLevel
     {
         ; Toggle key state
-        SetCapsLockstate,% GetKeyState("CapsLock","T") ? "Off":"On"
-        WriteDebug("BlockCaps: Toggled")
+        SetCapsLockstate, % GetKeyState("CapsLock","T") ? "Off":"On"
+        WriteDebug("BlockCaps: Toggled", "", "debug", "BlockCapsLock")
     } else {
-        WriteDebug("BlockCaps: Blocked Capslock")
+        WriteDebug("BlockCaps: Blocked Capslock", "", "debug", "BlockCapsLock")
     }
 }

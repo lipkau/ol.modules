@@ -1,10 +1,10 @@
 [
   {
-    "author": "Lipkau",
+    "author": "Oliver Lipkau",
     "date": "2016 11 18",
     "description": "Simulate the OSx scrolling behavior.",
     "typ": "nfo",
-    "url": "https://github.com/lipkau/ol.modules/wiki/ScreenShotTool",
+    "url": "https://github.com/lipkau/ol.modules/wiki/InvertScrolling",
     "version": "0.1"
   },
   {

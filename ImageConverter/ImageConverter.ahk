@@ -29,13 +29,13 @@ class CImageConverterAction
             for index, window in CImageConverter.Instances ;Find existing instance of window
                 if (window.ReuseWindow)
                 {
-                    WriteDebug("Reusing active ImageConverter window", window)
+                    WriteDebug("Reusing active ImageConverter window", window, "debug", "ImageConverter")
                     ImageConverter := window
                     break
                 }
         if (!ImageConverter)
             ImageConverter := new CImageConverter(this)
-        WriteDebug("Adding files to ImageConverter: ", Files)
+        WriteDebug("Adding files to ImageConverter: ", Files, "debug", "ImageConverter")
         ImageConverter.AddFiles(Files)
         return 1
     }

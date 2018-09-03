@@ -1,10 +1,10 @@
 [
   {
-    "author": "Lipkau",
+    "author": "Oliver Lipkau",
     "date": "2016 11 24",
     "description": "Module for controlling the Window's volume in different ways.",
     "typ": "nfo",
-    "url": "https://github.com/lipkau/ol.modules/wiki/urlShortener",
+    "url": "https://github.com/lipkau/ol.modules/wiki/VolumeManager",
     "version": "0.1"
   },
   {
@@ -12,7 +12,7 @@
     "typ": "include"
   },
   {
-    "code": "",
+    "code": "VolumeManager.Init()",
     "typ": "init"
   },
   {
@@ -35,7 +35,7 @@
         "scope": [
           "ahk_class Shell_TrayWnd"
         ],
-        "scopeChange": true,
+        "scopeChange": false,
         "scopeMode": 0,
         "typ": "hotkey"
       },
@@ -53,7 +53,23 @@
         "scope": [
           "ahk_class Shell_TrayWnd"
         ],
-        "scopeChange": true,
+        "scopeChange": false,
+        "scopeMode": 0,
+        "typ": "hotkey"
+      },
+      {
+        "disablable": false,
+        "enabled": true,
+        "functionCode": "VolumeManager.execute(\"toggle\", \"Shell_TrayWnd\")",
+        "functionMode": 0,
+        "key": "Mbutton",
+        "keyChange": false,
+        "label": "Mute/Unmute",
+        "mode": "ahk",
+        "multiple": false,
+        "name": "VolumeManager_Hotkey0",
+        "scope": [],
+        "scopeChange": false,
         "scopeMode": 0,
         "typ": "hotkey"
       }
@@ -82,7 +98,7 @@
         "multiple": false,
         "name": "VolumeManager_Hotkey0",
         "scope": [],
-        "scopeChange": true,
+        "scopeChange": false,
         "scopeMode": 0,
         "typ": "hotkey"
       },
@@ -98,7 +114,7 @@
         "multiple": false,
         "name": "VolumeManager_Hotkey0",
         "scope": [],
-        "scopeChange": true,
+        "scopeChange": false,
         "scopeMode": 0,
         "typ": "hotkey"
       },
@@ -114,7 +130,7 @@
         "multiple": false,
         "name": "VolumeManager_Hotkey0",
         "scope": [],
-        "scopeChange": true,
+        "scopeChange": false,
         "scopeMode": 0,
         "typ": "hotkey"
       }
@@ -214,7 +230,7 @@
     ],
     "disablable": true,
     "enabled": false,
-    "label": "Custome Binding",
+    "label": "Custom Binding",
     "name": "VolumeManager_GroupBox4",
     "typ": "group"
   },
@@ -227,16 +243,16 @@
         "value": true
       },
       {
-        "decimals": 1,
-        "label": "Volume steps",
+        "decimals": 0,
+        "label": "Volume step size",
         "max": 100.0,
         "min": 1.0,
         "name": "VolumeManager_StepSize",
         "slider": true,
         "step_len": 1.0,
-        "suffix": "",
+        "suffix": "%",
         "typ": "number",
-        "value": 5.0
+        "value": 5
       }
     ],
     "disablable": false,

@@ -1,5 +1,5 @@
 ; urlShortener - urlShortener.ahk
-; author: olive_000
+; author: Oliver Lipkau <https://github.com/lipkau>
 ; created: 2016 11 13
 
 #include lib\ahklib\jxon.ahk
@@ -18,6 +18,13 @@
  */
 class urlShortener
 {
+    /**
+     * Module properties
+     */
+    static moduleBundle := "ol.modules"
+    static moduleName   := "urlShortener"
+    static moduleHelp   := "https://github.com/lipkau/ol.modules/wiki/urlShortener"
+
     static _defaultService := "goo.gl"
 
     /**
@@ -26,35 +33,38 @@ class urlShortener
      */
     Execute()
     {
+        WriteDebug("Executing ""urlShortener""", "", "i", this.moduleName)
+        WriteDebug("Using service:", this.service, "debug", this.moduleName)
+
         ; Read clipboard
         longURL := clipboard
 
         ; Validate clip as url
         if (isURL(longURL))
         {
-            if (this.service == "goo.gl")
-            {
-                ; Shorten URL using goo.gl
+            if (this.service == "goo.gl")          ; Shorten URL using goo.gl
                 shortURL := this._googleShortening(longURL)
-            } else if (this.service == "tny.im")
-            {
-                ; Shorten URL using tny.im
+            else if (this.service == "tny.im")     ; Shorten URL using tny.im
                 shortURL := this._tnyimShortening(longURL)
-            }
 
             if (shortURL)
             {
+                WriteDebug("Short url:", shortURL, "debug", this.moduleName)
+
                 ; Store shortend URL in clipboard
                 Clipboard := ShortURL
 
                 Notify("URL shortened!", "URL shortened and copied to clipboard!", 2, NotifyIcons.Success)
                 return 1
             } else {
+                WriteDebug("Failed to connect to service", "", "debug", this.moduleName)
                 Notify("Failed to shorten URL", "An error occured while trying to connect to the server.", 2, NotifyIcons.Error)
                 return 0
             }
-        } else
+        } else {
+            WriteDebug("invalid long URL:", longURL, "debug", this.moduleName)
             Notify("No valid URL", "Clipboard does not contain a valid URL to shorten.", 2, NotifyIcons.Error)
+        }
     }
 
     service[]
@@ -84,18 +94,21 @@ class urlShortener
 
         POSTdata := "{""longUrl"": """ longURL """}"
 
-        WriteDebug("HTTPRequest request HEADER:", Headers, "`n")
-        WriteDebug("HTTPRequest request Options:", Options, "`n")
+        WriteDebug("HTTPRequest request HEADER:", Headers, "debug", this.moduleName)
+        WriteDebug("HTTPRequest request Options:", Options, "debug", this.moduleName)
 
         HTTPRequest(ApiURi , POSTdata, Headers, Options)
 
-        WriteDebug("HTTPRequest response HEADER:", Headers)
-        WriteDebug("HTTPRequest response BODY:", POSTdata)
+        WriteDebug("HTTPRequest response HEADER:", Headers, "debug", this.moduleName)
+        WriteDebug("HTTPRequest response BODY:", POSTdata, "debug", this.moduleName)
 
         obj := Jxon_Load(POSTdata)
         return % obj.id
     }
 
+    /**
+     * Call the tny.om API to shorten URL
+     */
     _tnyimShortening(longURL)
     {
         ApiURi := "http://tny.im/yourls-api.php"
@@ -108,13 +121,13 @@ class urlShortener
         Options .= Settings.Proxy.Enabled ? "Proxy: " Settings.Proxy.Address ":" Settings.Proxy.Port "`n" : ""
 
         apiURi .= "?action=shorturl&format=json&&url=" longURL
-        WriteDebug("HTTPRequest request HEADER:", Headers, "`n")
-        WriteDebug("HTTPRequest request Options:", Options, "`n")
+        WriteDebug("HTTPRequest request HEADER:", Headers, "debug", this.moduleName)
+        WriteDebug("HTTPRequest request Options:", Options, "debug", this.moduleName)
 
         HTTPRequest(ApiURi , POSTdata, Headers, Options)
 
-        WriteDebug("HTTPRequest response HEADER:", Headers)
-        WriteDebug("HTTPRequest response BODY:", POSTdata)
+        WriteDebug("HTTPRequest response HEADER:", Headers, "debug", this.moduleName)
+        WriteDebug("HTTPRequest response BODY:", POSTdata, "debug", this.moduleName)
 
         obj := Jxon_Load(POSTdata)
         if (obj.statusCode == 200)

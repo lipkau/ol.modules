@@ -26,10 +26,10 @@ class dynSnips
 
         this._menuClicker := ObjBindMethod(this, "MenuClick")
 
-        _icon := this.scriptPath . "\a2icon.ico"
+        _icon := this.scriptPath . "\a2icon_16.png"
         Menu, snip_Root, Add,     % this.ScriptName, noOp
         Menu, snip_Root, default, % this.ScriptName
-        Menu, snip_Root, Icon,    % this.ScriptName, %_icon%
+        Menu, snip_Root, Icon,    % this.ScriptName, %_icon%, , 0
         Menu, snip_Root, Add
 
         snip_level := 0
@@ -37,7 +37,7 @@ class dynSnips
         snip_lvl%snip_level%_LongFileName := snip_path_run
         i := 1
         ;~ First level
-        Loop, %snip_path_run%\*.*,2, 0 ; Get only Folders
+        Loop, %snip_path_run%\*.*, 2, 0 ; Get only Folders
         {
             snip_level := 1
             snip_plevel := snip_level -1
