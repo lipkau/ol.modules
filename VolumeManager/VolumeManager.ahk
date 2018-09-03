@@ -4,6 +4,7 @@
 
 #include lib\ahklib\VA.ahk
 #include lib\ahklib\CNotification.ahk
+#include lib\ahklib\func_mouseposition.ahk
 
 /**
  * TODO:
@@ -43,7 +44,7 @@ class VolumeManager
     Execute(command, hwnd = false)
     {
         if (hwnd)
-            if (this._WindowIsOverMouse(hwnd))
+            if (MouseOverCondition("Tray") && !MouseOverCondition("Clock"))
                 this.ChangeVolume(command)
             else {
                 WriteDebug("Hotkey ignored", A_ThisHotkey, "debug", this.moduleName)
@@ -130,20 +131,6 @@ class VolumeManager
             }
         }
         return 1
-    }
-
-    /**
-     * Private Method
-     *     Check if mouse is hovering a window
-     *
-     * @param  string  hwnd   Window handler
-     * @return bool
-     */
-    _WindowIsOverMouse(hwnd)
-    {
-        MouseGetPos,,,TargetWindow
-        class := WinGetClass("ahk_id " TargetWindow)
-        return (class == hwnd) ? true : false
     }
 
     /**

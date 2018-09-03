@@ -4,6 +4,7 @@
 
 #include lib\ahklib\CPrompt.ahk
 #include lib\ahklib\CNotification.ahk
+#include lib\ahklib\func_mouseposition.ahk
 
 /**
  * TODO:
@@ -32,7 +33,7 @@ class SetTimer
      */
     Execute(method)
     {
-        if ((method == "overClock" && this._IsMouseOverClock()) OR (method == "show"))
+        if ((method == "overClock" && MouseOverCondition("Clock")) OR (method == "show"))
         {
             timerType := this.Prompt("timerType")
             if (timerType == -1)
