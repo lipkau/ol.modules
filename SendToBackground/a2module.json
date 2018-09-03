@@ -21,35 +21,41 @@
   {
     "children": [
       {
-        "disablable": true,
-        "enabled": true,
-        "functionCode": "SendToBackground.Trigger()",
-        "functionMode": 0,
-        "keyChange": true,
-        "label": "Trigger",
-        "multiple": true,
-        "name": "SendToBackground_Hotkey",
-        "scopeChange": true,
-        "typ": "hotkey"
-      },
-      {
-        "disablable": true,
-        "enabled": true,
-        "functionCode": "SendToBackground.SetTarget()",
-        "functionMode": 0,
-        "keyChange": true,
-        "label": "Set target window",
-        "multiple": true,
-        "name": "SendToBackground_Hotkey",
-        "scopeChange": true,
-        "typ": "hotkey"
-      },
-      {
         "label": "Command to send",
         "name": "SendToBackground_Command",
         "password_mode": false,
         "typ": "string",
-        "value": ""
+        "value": "%clipboard%{enter}"
+      },
+      {
+        "disablable": false,
+        "enabled": true,
+        "functionCode": "SendToBackground.Trigger()",
+        "functionMode": 0,
+        "key": [
+          "Lctrl+B"
+        ],
+        "keyChange": true,
+        "label": "Trigger command",
+        "multiple": true,
+        "name": "SendToBackground_HotkeyTrigger",
+        "scopeChange": false,
+        "typ": "hotkey"
+      },
+      {
+        "disablable": false,
+        "enabled": true,
+        "functionCode": "SendToBackground.SetTarget()",
+        "functionMode": 0,
+        "key": [
+          "Lwin+F9"
+        ],
+        "keyChange": true,
+        "label": "Set target window",
+        "multiple": true,
+        "name": "SendToBackground_HotkeySetTarget",
+        "scopeChange": false,
+        "typ": "hotkey"
       }
     ],
     "disablable": false,
@@ -61,8 +67,14 @@
   {
     "children": [
       {
+        "label": "Enabled",
+        "name": "SendToBackground_CheckBoxContinuously",
+        "typ": "check",
+        "value": false
+      },
+      {
         "decimals": 1,
-        "label": "Interval to send command",
+        "label": "Interval (in seconds)",
         "max": 100.0,
         "min": 0.0,
         "name": "SendToBackground_Interval",
@@ -71,18 +83,12 @@
         "suffix": "",
         "typ": "number",
         "value": 0.0
-      },
-      {
-        "label": "Send the command continuously",
-        "name": "SendToBackground_Continuously",
-        "typ": "check",
-        "value": false
       }
     ],
-    "disablable": true,
+    "disablable": false,
     "enabled": true,
-    "label": "some group name",
-    "name": "SendToBackground_GroupBox2",
+    "label": "Send command continuously",
+    "name": "SendToBackground_GroupContinuously",
     "typ": "group"
   }
 ]
