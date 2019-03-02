@@ -75,8 +75,8 @@ XML_Read(xml,node = 0)
 {
     if (node = 0)
         node := Object()
-    xml := strTrim(xml,"`r`n")
-    xml := strTrim(xml,"`n")
+    xml := string_trim(xml,"`r`n")
+    xml := string_trim(xml,"`n")
     if (InStr(xml,"<") != 1)
         return ""
     start := 1
@@ -84,7 +84,7 @@ XML_Read(xml,node = 0)
     {
         len := InStr(xml,">", 0, start + 1) - start - 1
         key := SubStr(xml,start + 1,InStr(xml,">", 0, start + 1) - start - 1)
-        if (strEndsWith(key,"/"))
+        if (string_endsWith(key,"/"))
         {
             start += strlen(key) + 3
             continue
@@ -113,8 +113,8 @@ XML_Read(xml,node = 0)
             }
         }
         value := SubStr(xml, start, end - start - 2 - strlen(key) - 1)
-        value := strTrimLeft(value, "`r`n")
-        value := strTrimLeft(value, "`n")
+        value := string_trimLeft(value, "`r`n")
+        value := string_trimLeft(value, "`n")
 
         if (InStr(value, "<"))
         {
@@ -153,9 +153,9 @@ XML_Get(XMLObject, path)
     Loop %node0%
     {
         node := node%A_Index%
-        if (strEndsWith(node,"]"))
+        if (string_endsWith(node,"]"))
         {
-            pos := strTrimRight(SubStr(node, InStr(node,"[",0,0) + 1),"]")
+            pos := string_trimRight(SubStr(node, InStr(node,"[",0,0) + 1),"]")
             node := SubStr(node, 1, InStr(node,"[",0,0) - 1)
         }
         else

@@ -167,9 +167,9 @@ class dynSnips
     scriptPath[]
     {
         get {
-            global a2Dir, a2_modules
+            global a2modules
 
-            return a2Dir "\" a2_modules "\ol.modules\dynSnips"
+            return a2modules "\ol.modules\dynSnips"
         }
     }
 }

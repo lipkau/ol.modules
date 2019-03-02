@@ -39,7 +39,7 @@
     "name": "DynSnip_path",
     "save_mode": false,
     "typ": "path",
-    "value": "%AppData%\\a2\\ol.modules\\dynSnips",
+    "value": "%a2module_data%\\ol.modules\\dynSnips",
     "writable": true
   }
 ]

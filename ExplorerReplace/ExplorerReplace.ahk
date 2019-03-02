@@ -2,8 +2,8 @@
 ; author: Oliver Lipkau <https://github.com/lipkau>
 ; created: 2016 11 25
 
-#include lib\ahklib\CNotification.ahk
-#include lib\ahklib\ExplorerHelpers.ahk
+#include <os>
+#include %A_LineFile%\..\..\ExplorerExtension\ExplorerHelpers.ahk
 
 /**
  * TODO:
@@ -370,7 +370,7 @@ Class CReplaceDialog
             this.CreateFilenameSearchTree(this.DirectoryTree)
             if (!this.Stop)
             {
-                this.CheckForDuplicates(this.DirectoryTree, AppendPaths(this.DirectoryTree.Path, this.DirectoryTree.Name), Array())
+                this.CheckForDuplicates(this.DirectoryTree, JoinPath(this.DirectoryTree.Path, this.DirectoryTree.Name), Array())
                 if (!this.Stop)
                 {
                     this.FlattenTree(this.DirectoryTree)
@@ -430,7 +430,7 @@ Class CReplaceDialog
         if (this.InSelectedFiles && Root = this.DirectoryTree) ;Base directory, skip files which are not in selection
             Selection := Navigation.GetSelectedFilepaths(this.Parent)
         items := 0
-        Loop % AppendPaths(AppendPaths(Root.Path, Root.Name), "*"), 1, 0
+        Loop % JoinPath(JoinPath(Root.Path, Root.Name), "*"), 1, 0
         {
             if (this.Stop)
                 return 0
@@ -492,8 +492,8 @@ Class CReplaceDialog
         {
             if (this.Stop)
                 return 0
-            OldPath := AppendPaths(RootPath, Root[index].Name)
-            NewPath := Root[index].NewFilename ? AppendPaths(RootPath, Root[index].NewFilename) : OldPath
+            OldPath := JoinPath(RootPath, Root[index].Name)
+            NewPath := Root[index].NewFilename ? JoinPath(RootPath, Root[index].NewFilename) : OldPath
             if (this.CollidingAction = "Append (Number)")
             {
                 SplitPath, NewPath,, dir, extension, filename
@@ -526,8 +526,8 @@ Class CReplaceDialog
         {
             if (this.Stop)
                 return 0
-            OldPath := AppendPaths(RootPath, Root[A_Index].Name)
-            NewPath := AppendPaths(RootPath, Root[A_Index].FixedNewFilename ? Root[A_Index].FixedNewFilename : Root[A_Index].NewFilename)
+            OldPath := JoinPath(RootPath, Root[A_Index].Name)
+            NewPath := JoinPath(RootPath, Root[A_Index].FixedNewFilename ? Root[A_Index].FixedNewFilename : Root[A_Index].NewFilename)
             if (Root[A_Index].Enabled && Root[A_Index].NewFilename)
             {
                 if (!Root[A_Index].Directory)
@@ -711,7 +711,7 @@ Class CReplaceDialog
         if (this.InSelectedFiles) ;skip files which are not in selection
             Selection := Navigation.GetSelectedFilepaths(this.Parent)
         items := 0
-        Loop % AppendPaths(this.BasePath, "*"), 0, % this.IncludeSubdirectories
+        Loop % JoinPath(this.BasePath, "*"), 0, % this.IncludeSubdirectories
         {
             if (this.Stop)
                 return 0
@@ -795,7 +795,7 @@ Class CReplaceDialog
                     Enabled := false
                  LV_GetText(Name, A_EventInfo, 1)
                  LV_GetText(Path, A_EventInfo, 2)
-                 Path := AppendPaths(this.BasePath, Path)
+                 Path := JoinPath(this.BasePath, Path)
                 TreeItem := this.FindTreeItem(this.DirectoryTree, Path, Name)
                 TreeItem.Enabled := Enabled
             }
@@ -810,7 +810,7 @@ Class CReplaceDialog
                     Enabled := false
                  LV_GetText(Path, A_EventInfo, 1)
                  LV_GetText(LineNumber, A_EventInfo, 2)
-                 Result := this.SearchResults.GetItemWithValue("Path", AppendPaths(this.BasePath,Path)).Lines.GetItemWithValue("Line", LineNumber)
+                 Result := this.SearchResults.GetItemWithValue("Path", JoinPath(this.BasePath,Path)).Lines.GetItemWithValue("Line", LineNumber)
                 Result.Enabled := Enabled
             }
         }
@@ -1027,7 +1027,7 @@ Class CReplaceDialog
         global ExplorerWindows
         WinSetTitle, % "ahk_id " this.hWnd,,Working...,
         if (this.Filenames)
-            this.PerformFileNameReplace(this.DirectoryTree, AppendPaths(this.DirectoryTree.Path, this.DirectoryTree.Name))
+            this.PerformFileNameReplace(this.DirectoryTree, JoinPath(this.DirectoryTree.Path, this.DirectoryTree.Name))
         else
             this.PerformFileContentReplace()
         if (this.Stop)

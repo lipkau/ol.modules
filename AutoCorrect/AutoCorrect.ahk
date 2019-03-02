@@ -2,8 +2,6 @@
 ; author: Oliver Lipkau <https://github.com/lipkau>
 ; created: 2016 11 21
 
-#include lib\ahklib\CNotification.ahk
-
 ; Author: Jim Biancolo and Wikipedia's Lists of Common Misspellings
 ; Source: AHK Help file
 

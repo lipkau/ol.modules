@@ -2,8 +2,6 @@
 ; author: Oliver Lipkau <https://github.com/lipkau>
 ; created: 2016 11 13
 
-#include lib\ahklib\CNotification.ahk
-
 /**
  * TODO:
  *     *

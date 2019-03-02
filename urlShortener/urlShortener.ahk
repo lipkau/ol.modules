@@ -2,11 +2,6 @@
 ; author: Oliver Lipkau <https://github.com/lipkau>
 ; created: 2016 11 13
 
-#include lib\ahklib\jxon.ahk
-#include lib\ahklib\base64.ahk
-#include lib\ahklib\HTTPRequest.ahk
-#include lib\ahklib\CNotification.ahk
-
 /**
  * TODO:
  *   * add more services?
@@ -40,7 +35,7 @@ class urlShortener
         longURL := clipboard
 
         ; Validate clip as url
-        if (isURL(longURL))
+        if (string_is_web_address(longURL))
         {
             if (this.service == "goo.gl")          ; Shorten URL using goo.gl
                 shortURL := this._googleShortening(longURL)
@@ -86,7 +81,9 @@ class urlShortener
 
         Headers := "Content-Type: application/json`n"
         Headers .= "Referer: https://github.com/lipkau/ol.modules`n"
-        Headers .= Settings.Proxy.Authentication.Username && Settings.Proxy.Authentication.Password ? "Proxy-Authorization: Basic " Base64Encode(Settings.Proxy.Authentication.Username ":" Settings.Proxy.Authentication.Password) : ""  ; TODO decrypt pw?
+        if (Settings.Proxy.Enabled) {
+            Headers .= Settings.Proxy.Authentication.Username && Settings.Proxy.Authentication.Password ? "Proxy-Authorization: Basic " base64_encode(Settings.Proxy.Authentication.Username ":" Settings.Proxy.Authentication.Password) : ""  ; TODO decrypt pw?
+        }
 
         Options := "Method: POST`n"
         Options .= "Charset: UTF-8`n"
@@ -115,7 +112,7 @@ class urlShortener
 
         Headers := "Content-Type: application/json`n"
         Headers .= "Referer: https://github.com/lipkau/ol.modules`n"
-        ; Headers .= Settings.Proxy.Authentication.Username && Settings.Proxy.Authentication.Password ? "Proxy-Authorization: Basic " Base64Encode(Settings.Proxy.Authentication.Username ":" Settings.Proxy.Authentication.Password) : ""  ; TODO decrypt pw?
+        ; Headers .= Settings.Proxy.Authentication.Username && Settings.Proxy.Authentication.Password ? "Proxy-Authorization: Basic " base64_encode(Settings.Proxy.Authentication.Username ":" Settings.Proxy.Authentication.Password) : ""  ; TODO decrypt pw?
 
         Options := "Charset: UTF-8`n"
         Options .= Settings.Proxy.Enabled ? "Proxy: " Settings.Proxy.Address ":" Settings.Proxy.Port "`n" : ""

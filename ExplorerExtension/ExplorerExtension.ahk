@@ -2,11 +2,9 @@
 ; author: Lipkau
 ; created: 2016 11 28
 
-#include lib\ahklib\CQueue.ahk
-#include lib\ahklib\Navigation.ahk
-#include lib\ahklib\WaitForEvent.ahk
-#include lib\ahklib\CNotification.ahk
-#include lib\ahklib\ExplorerHelpers.ahk
+#include <Array>
+#include <CQueue>
+#include %A_LineFile%\..\ExplorerHelpers.ahk
 
 /**
  * TODO:

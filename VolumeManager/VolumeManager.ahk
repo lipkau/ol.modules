@@ -2,8 +2,7 @@
 ; author: Oliver Lipkau <https://github.com/lipkau>
 ; created: 2016 11 24
 
-#include lib\ahklib\VA.ahk
-#include lib\ahklib\CNotification.ahk
+#include %A_LineFile%\..\VA.ahk
 
 /**
  * TODO:
