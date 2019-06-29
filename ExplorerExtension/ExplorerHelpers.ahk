@@ -1,3 +1,5 @@
+#include %A_LineFile%\..\..\.lib\Notify.ahk
+
 ; Gets focused control in XP to prevent blocking double clicks like with ControlGetFocus
 XPGetFocussed()
 {
@@ -244,7 +246,7 @@ CreateTooltipControl(hwind)
 AttachToolWindow(hParent, GUINumber, AutoClose)
 {
     global ToolWindows
-    WriteDebug("AttachToolWindow " GUINumber " to " hParent, "", "debug", "ExplorerHelpers")
+    a2log_debug("AttachToolWindow " GUINumber " to " hParent, "", "ExplorerHelpers")
     if (!IsObject(ToolWindows))
     ToolWindows := Object()
     if (!WinExist("ahk_id " hParent))

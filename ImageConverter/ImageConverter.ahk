@@ -1,9 +1,11 @@
+#include %A_LineFile%\..\..\.lib\Notify.ahk
+
 ; ImageConverter - ImageConverter.ahk
 ; author: Oliver Lipkau
 ; created: 2016 11 14
 
-#include lib\ahklib\CGUI\CGUI.ahk
-#include lib\ahklib\CNotification.ahk
+; #include lib\ahklib\CGUI\CGUI.ahk
+; #include lib\ahklib\CNotification.ahk
 
 /**
  * TODO:
@@ -12,6 +14,8 @@
  *       - integrate with FTP
  *       - integrate with ImageUpload
  */
+
+a2log_info("Initializing module", "", "ImageConverter")
 
 class CImageConverterAction
 {
@@ -29,13 +33,13 @@ class CImageConverterAction
             for index, window in CImageConverter.Instances ;Find existing instance of window
                 if (window.ReuseWindow)
                 {
-                    WriteDebug("Reusing active ImageConverter window", window, "debug", "ImageConverter")
+                    a2log_debug("Reusing active ImageConverter window", window, "ImageConverter")
                     ImageConverter := window
                     break
                 }
         if (!ImageConverter)
             ImageConverter := new CImageConverter(this)
-        WriteDebug("Adding files to ImageConverter: ", Files, "debug", "ImageConverter")
+        a2log_debug("Adding files to ImageConverter: ", Files, "ImageConverter")
         ImageConverter.AddFiles(Files)
         return 1
     }
@@ -176,7 +180,7 @@ class CImageConverter extends CGUI
         Files := ToArray(Files)
         if (Files.MaxIndex() < 1)
         {
-            Notify("Image Converter Error", "No files selected!", 5, NotifyIcons.Error)
+            notify("Image Converter", "No files selected!", 5, NotifyIcons.Error)
             return
         }
         Added := false
@@ -185,7 +189,7 @@ class CImageConverter extends CGUI
             SplitPath(file, Filename, "", Extension)
             if Extension not in BMP,DIB,RLE,JPG,JPEG,JPE,JFIF,GIF,TIF,TIFF,PNG
             {
-                Notify("Image Converter Error", file " is no supported image format!", 5, NotifyIcons.Error)
+                notify("Image Converter", file " is no supported image format!", 5, NotifyIcons.Error)
                 continue
             }
             if (!this.Files.GetItemWithValue("SourceFile", file)) ;Append files which aren't yet in the list
@@ -207,7 +211,7 @@ class CImageConverter extends CGUI
             this.Show()
         }
         else
-            Notify("Image Converter Error", "No new files!", 5, NotifyIcons.Error)
+            notify("Image Converter", "No new files!", 5, NotifyIcons.Error)
         return
     }
 
@@ -329,7 +333,7 @@ class CImageConverter extends CGUI
             Gdip_DisposeImage(pBitmap)
         }
         else
-            Notify("Image Converter Error", "Failed to load image for copying!", 5, NotifyIcons.Error)
+            notify("Image Converter", "Failed to load image for copying!", 5, NotifyIcons.Error)
     }
 
     btnUpload_Click()
@@ -408,10 +412,10 @@ class CImageConverter extends CGUI
             {
                 for index, image in FailedImages
                     Files .= (index := 1 ? "" : "`n") Image
-                Notify("Image Conversion failed!", "Failed to convert these files:`n" Files, 5, NotifyIcons.Error)
+                notify("Image Converter", "Failed to convert these files:`n" Files, 5, NotifyIcons.Error)
             }
             else
-                Notify("Image Conversion completed!", "Successfully converted " ConvertedImages.MaxIndex() " files.", 5, NotifyIcons.Success)
+                notify("Image Converter", "Successfully converted " ConvertedImages.MaxIndex() " files.", 5, NotifyIcons.Success)
             this.Close()
         }
     }

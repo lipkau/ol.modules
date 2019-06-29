@@ -3,6 +3,8 @@
 ; created: 2016 11 25
 
 #include <os>
+#include %A_LineFile%\..\..\.lib\Notify.ahk
+#include %A_LineFile%\..\..\.lib\helpers.ahk
 #include %A_LineFile%\..\..\ExplorerExtension\ExplorerHelpers.ahk
 
 /**
@@ -30,9 +32,12 @@ class ExplorerReplace
 
         ; Test if ExplorerExtension was loaded
         if (!(IsFunc("InitExplorerWindows"))) {
-            Notify("Missing dependency", "ExplorerReplace could not be loaded because of a missing dependency: ExplorerExtension.", 5, NotifyIcons.Error, "ExplorerReplace_DependencyHelp")
+            notify("Missing dependency", "ExplorerReplace could not be loaded because of a missing dependency: ExplorerExtension.", 5, NotifyIcons.Error)
             return
         }
+
+
+        a2log_info("Initializing module", "", "ExplorerReplace")
 
         if (ExplorerReplace_RegisterInContextMenu == true)
         {
@@ -343,14 +348,14 @@ Class CReplaceDialog
             key := SubStr(key, 2)
             if (WinGetClass("ahk_id " value) = "Button")
             {
-                WriteDebug("button " ControlGetText("", "ahk_id " value), "", "debug", "ExplorerReplace")
+                a2log_debug("button " ControlGetText("", "ahk_id " value), "", "ExplorerReplace")
                 this[key] := ControlGet("Checked","","", "ahk_id " value)
             }
             else if (WinGetClass("ahk_id " value) = "Edit")
                 this[key] := ControlGetText("", "ahk_id " value)
             else if (WinGetClass("ahk_id " value) = "ComboBox")
                 this[key] := ControlGetText("", "ahk_id " value)
-            WriteDebug(key "=" this[key] ", hwnd=" value ", class = " WinGetClass("ahk_id " value), "", "debug", "ExplorerReplace")
+            a2log_debug(key "=" this[key] ", hwnd=" value ", class = " WinGetClass("ahk_id " value), "", "ExplorerReplace")
         }
         this.SearchResults := Array()
         LV_Delete()
@@ -644,7 +649,7 @@ Class CReplaceDialog
             if (this.TrimLineEnd && this.TrimLineEndEdit)
             {
                 NewText := RTrim(NewText, this.TrimLineEndEdit)
-                WriteDebug("trimmed " newtext, "", "debug", "ExplorerReplace")
+                a2log_debug("trimmed " newtext, "", "ExplorerReplace")
             }
             if (this.InsertLineChars && this.InsertLineCharsEdit && IsNumeric(this.InsertLineCharsPos) && this.InsertLineCharsPos >= 0)
             {

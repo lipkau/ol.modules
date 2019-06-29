@@ -8,6 +8,8 @@
  *       - bit.ly - needs auth
  */
 
+#include %A_LineFile%\..\..\.lib\Notify.ahk
+
 /**
  * Class to control the shortening of URLs
  */
@@ -28,8 +30,8 @@ class urlShortener
      */
     Execute()
     {
-        WriteDebug("Executing ""urlShortener""", "", "i", this.moduleName)
-        WriteDebug("Using service:", this.service, "debug", this.moduleName)
+        a2log_info("Executing ""urlShortener""", "", this.moduleName)
+        a2log_debug("Using service:", this.service, this.moduleName)
 
         ; Read clipboard
         longURL := clipboard
@@ -44,21 +46,21 @@ class urlShortener
 
             if (shortURL)
             {
-                WriteDebug("Short url:", shortURL, "debug", this.moduleName)
+                a2log_debug("Short url:", shortURL, this.moduleName)
 
                 ; Store shortend URL in clipboard
                 Clipboard := ShortURL
 
-                Notify("URL shortened!", "URL shortened and copied to clipboard!", 2, NotifyIcons.Success)
+                notify(this.moduleName, "URL shortened and copied to clipboard!", 2, NotifyIcons.Success)
                 return 1
             } else {
-                WriteDebug("Failed to connect to service", "", "debug", this.moduleName)
-                Notify("Failed to shorten URL", "An error occured while trying to connect to the server.", 2, NotifyIcons.Error)
+                a2log_error("Failed to connect to service", "", this.moduleName)
+                notify(this.moduleName, "An error occured while trying to connect to the server.", 2, NotifyIcons.Error)
                 return 0
             }
         } else {
-            WriteDebug("invalid long URL:", longURL, "debug", this.moduleName)
-            Notify("No valid URL", "Clipboard does not contain a valid URL to shorten.", 2, NotifyIcons.Error)
+            a2log_error("invalid long URL:", longURL, this.moduleName)
+            notify(this.moduleName, "Clipboard does not contain a valid URL to shorten.", 2, NotifyIcons.Error)
         }
     }
 
@@ -91,13 +93,13 @@ class urlShortener
 
         POSTdata := "{""longUrl"": """ longURL """}"
 
-        WriteDebug("HTTPRequest request HEADER:", Headers, "debug", this.moduleName)
-        WriteDebug("HTTPRequest request Options:", Options, "debug", this.moduleName)
+        a2log_debug("HTTPRequest request HEADER:", Headers, this.moduleName)
+        a2log_debug("HTTPRequest request Options:", Options, this.moduleName)
 
         HTTPRequest(ApiURi , POSTdata, Headers, Options)
 
-        WriteDebug("HTTPRequest response HEADER:", Headers, "debug", this.moduleName)
-        WriteDebug("HTTPRequest response BODY:", POSTdata, "debug", this.moduleName)
+        a2log_debug("HTTPRequest response HEADER:", Headers, this.moduleName)
+        a2log_debug("HTTPRequest response BODY:", POSTdata, this.moduleName)
 
         obj := Jxon_Load(POSTdata)
         return % obj.id
@@ -118,13 +120,13 @@ class urlShortener
         Options .= Settings.Proxy.Enabled ? "Proxy: " Settings.Proxy.Address ":" Settings.Proxy.Port "`n" : ""
 
         apiURi .= "?action=shorturl&format=json&&url=" longURL
-        WriteDebug("HTTPRequest request HEADER:", Headers, "debug", this.moduleName)
-        WriteDebug("HTTPRequest request Options:", Options, "debug", this.moduleName)
+        a2log_debug("HTTPRequest request HEADER:", Headers, this.moduleName)
+        a2log_debug("HTTPRequest request Options:", Options, this.moduleName)
 
         HTTPRequest(ApiURi , POSTdata, Headers, Options)
 
-        WriteDebug("HTTPRequest response HEADER:", Headers, "debug", this.moduleName)
-        WriteDebug("HTTPRequest response BODY:", POSTdata, "debug", this.moduleName)
+        a2log_debug("HTTPRequest response HEADER:", Headers, this.moduleName)
+        a2log_debug("HTTPRequest response BODY:", POSTdata, this.moduleName)
 
         obj := Jxon_Load(POSTdata)
         if (obj.statusCode == 200)

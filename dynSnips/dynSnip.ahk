@@ -18,6 +18,8 @@ class dynSnips
 
     Init()
     {
+        a2log_info("Initializing module", "", "dynSnips")
+
         snip_path_run := this.snipPath
         if (!(InStr(FileExist(this.snipPath), "D"))) {
             ; FileCreateDir % this.snipPath

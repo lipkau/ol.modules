@@ -1,3 +1,5 @@
+#include %A_LineFile%\..\..\.lib\Notify.ahk
+
 ; AutoCorrect - AutoCorrect.ahk
 ; author: Oliver Lipkau <https://github.com/lipkau>
 ; created: 2016 11 21
@@ -73,7 +75,7 @@ AutoCorrect_Init()
 {
     global AutoCorrect_Hoty_Enabled, AutoCorrect_Hoty_Keys
 
-    WriteDebug("Initializing module", "", "i", "AutoCorrect")
+    a2log_info("Initializing module", "", "AutoCorrect")
 
     if (AutoCorrect_Hoty_Enabled == true)
     {
@@ -99,7 +101,7 @@ AutoCorrect_AddCustom()
 {
     global AutoCorrect_AutoReload
 
-    WriteDebug("Adding custom element", "", "i", "AutoCorrect")
+    a2log_debug("Adding custom element", "", "AutoCorrect")
 
     thisFile := a2.Path "\" a2.Modules "\ol.modules\AutoCorrect\AutoCorrect.ahk"
     tt(thisFile)
@@ -131,7 +133,7 @@ AutoCorrect_AddCustom()
     if ErrorLevel <> 0  ; The user pressed Cancel.
         return
     ; Otherwise, add the hotstring and reload the script:
-    WriteDebug("Storing custom element", Hotstring, "debug", "AutoCorrect")
+    a2log_debug("Storing custom element", Hotstring, "AutoCorrect")
     FileAppend, `n%Hotstring%, %thisFile%  ; Put a `n at the beginning in case file lacks a blank line at its end.
     Notify(AutoCorrect, Added new custom correction, 3, NotifyIcons.Success)
     sleep 500

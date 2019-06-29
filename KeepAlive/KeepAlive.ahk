@@ -34,7 +34,7 @@ class KeepAlive {
      */
     Init()
     {
-        WriteDebug("Initializing module", "", "i", this.moduleName)
+        a2log_info("Initializing module", "", this.moduleName)
 
         this.timer := ObjBindMethod(this, "ResetTimeIdle")
         if (this._enabledByDefault)
@@ -47,7 +47,7 @@ class KeepAlive {
     ResetTimeIdle()
     {
         if (A_TimeIdle > this.timeout) {
-            WriteDebug("Reset A_TimeIdle", "", "i", this.moduleName)
+            a2log_info("Reset A_TimeIdle", "", this.moduleName)
 
             SendInput {ScrollLock}{ScrollLock}
         }
@@ -55,23 +55,23 @@ class KeepAlive {
 
     Activate()
     {
-        WriteDebug("Activating module", "", "i", this.moduleName)
-        WriteDebug("Using timeout of:", this.timeout, "debug", this.moduleName)
+        a2log_info("Activating module", "", this.moduleName)
+        a2log_debug("Using timeout of:", this.timeout, this.moduleName)
 
         timer := this.timer
-        SetTimer % timer, 2000
+        SetTimer, % timer, 2000
         this.active := true
-        Notify("KeepAlive activated", "", 2, NotifyIcons.Success)
+        notify(moduleName, "KeepAlive activated", 2, NotifyIcons.Success)
     }
 
     Deactivate()
     {
-        WriteDebug("Deactivating module", "", "i", this.moduleName)
+        a2log_info("Deactivating module", "", this.moduleName)
 
         timer := this.timer
         SetTimer % timer, 2000
         this.active := false
-        Notify("KeepAlive dectivated", "", 2, NotifyIcons.Success)
+        notify(moduleName, "KeepAlive dectivated", 2, NotifyIcons.Success)
     }
 
     /**

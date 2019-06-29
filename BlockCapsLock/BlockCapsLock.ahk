@@ -7,6 +7,9 @@
  *
  * @return
  */
+
+a2log_info("Initializing module", "", "BlockCapsLock")
+
 BlockCapsLock_callback()
 {
     ; Key was pressed for at least 0.3s
@@ -15,8 +18,8 @@ BlockCapsLock_callback()
     {
         ; Toggle key state
         SetCapsLockstate, % GetKeyState("CapsLock","T") ? "Off":"On"
-        WriteDebug("BlockCaps: Toggled", "", "debug", "BlockCapsLock")
+        a2log_debug("BlockCaps: Toggled", "", "BlockCapsLock")
     } else {
-        WriteDebug("BlockCaps: Blocked Capslock", "", "debug", "BlockCapsLock")
+        a2log_debug("BlockCaps: Blocked Capslock", "", "BlockCapsLock")
     }
 }

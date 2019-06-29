@@ -3,7 +3,7 @@
 ; created: 2018 9 3
 
 #include lib\ahklib\ModuleModel.ahk
-#include lib\ahklib\CNotification.ahk
+#include %A_LineFile%\..\..\.lib\Notify.ahk
 
 class SendToBackground extends ModuleModel
 {
@@ -27,7 +27,7 @@ class SendToBackground extends ModuleModel
         this.isRunning := False
         this.timer := ObjBindMethod(this, "SendCommand")
 
-        WriteDebug("Initializing module", "", "i", this.moduleName)
+        a2log_info("Initializing module", "", this.moduleName)
     }
 
     /**
@@ -36,7 +36,7 @@ class SendToBackground extends ModuleModel
     SetTarget()
     {
         this.TargetWindow := ""
-        WriteDebug("cleared target window", "", "i", this.moduleName)
+        a2log_debug("cleared target window", "", this.moduleName)
 
         WinGet, active_pid, PID, A
         WinGetTitle, active_title, ahk_pid %active_pid%
@@ -44,14 +44,14 @@ class SendToBackground extends ModuleModel
         this.TargetWindow := active_pid
         if (this.TargetWindow)
         {
-            Notify(this.moduleName ": Stored new Taget Window", "Stored a new target window:`n" active_title, 4, NotifyIcons.Success)
-            WriteDebug("stored new target window", "", "i", this.moduleName)
-            WriteDebug("stored window:", "[" active_pid "] " active_title, "debug", this.moduleName)
+            notify(this.moduleName, "Stored a new target window:`n" active_title, 4, NotifyIcons.Success)
+            a2log_debug("stored new target window", "", this.moduleName)
+            a2log_debug("stored window:", "[" active_pid "] " active_title, "debug", this.moduleName)
         }
         else
         {
-            Notify(this.moduleName ": Failed to store new Target Window", "", 4, NotifyIcons.Error)
-            WriteDebug("failed to store new target window", "", "i", this.moduleName)
+            notify(this.moduleName, "Failed to store new Target Window", 4, NotifyIcons.Error)
+            a2log_debug("failed to store new target window", "", this.moduleName)
         }
     }
 
@@ -62,15 +62,15 @@ class SendToBackground extends ModuleModel
     {
         if (!this._command)
         {
-            WriteDebug("missing command", "", "error", this.moduleName)
-            Notify(this.moduleName ": Missing a command", "No command has been defined that should be sent.", 4, NotifyIcons.Error)
+            a2log_error("missing command", "", this.moduleName)
+            notify(this.moduleName, "No command has been defined that should be sent.", 4, NotifyIcons.Error)
             return
         }
 
         if (!this.TargetWindow)
         {
-            WriteDebug("missing target window", "", "error", this.moduleName)
-            Notify(this.moduleName ": Missing a target Window", "No Target Window has been set.", 4, NotifyIcons.Error)
+            a2log_error("missing target window", "", this.moduleName)
+            notify(this.moduleName, "No Target Window has been set.", 4, NotifyIcons.Error)
             return
         }
 

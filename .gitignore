@@ -6,3 +6,4 @@ AutoCorrect/AutoCorrect.ahk
 # Exclude all starting with . or _
 _ *
 .*
+!.lib/
