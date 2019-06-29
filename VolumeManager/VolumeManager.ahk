@@ -2,7 +2,8 @@
 ; author: Oliver Lipkau <https://github.com/lipkau>
 ; created: 2016 11 24
 
-#include %A_LineFile%\..\VA.ahk
+#MaxHotkeysPerInterval 200
+#include %A_LineFile%\..\..\.lib\Notify.ahk
 
 /**
  * TODO:
@@ -24,13 +25,15 @@ class VolumeManager
      */
     static _defaultStepSize := 5
 
+    static running := false
+
     /**
      * method to initialize the module
      */
     Init()
     {
         ; Only debug message
-        WriteDebug("Initializing module", "", "i", this.moduleName)
+        a2log_info("Initializing module", "", this.moduleName)
     }
 
     /**
@@ -41,19 +44,23 @@ class VolumeManager
      */
     Execute(command, hwnd = false)
     {
+        if (this.running)
+            return false
+
+        this.running := true
         if (hwnd)
             if (this._WindowIsOverMouse(hwnd))
                 this.ChangeVolume(command)
             else {
-                WriteDebug("Hotkey ignored", A_ThisHotkey, "debug", this.moduleName)
-                WriteDebug("Not over window", hwnd, "debug", this.moduleName)
+                a2log_debug("Hotkey ignored " A_ThisHotkey, "Not over window " hwnd, this.moduleName)
                 this._defaultBehavior(A_ThisHotkey)
             }
-
-        else if (command)
-            this.ChangeVolume(command)
         else
-            this._defaultBehavior(A_ThisHotkey)
+            this.ChangeVolume(command)
+
+        this.running := false
+
+        return true
     }
 
     /**
@@ -63,71 +70,24 @@ class VolumeManager
      */
     ChangeVolume(newValue)
     {
-        ; Need to check for sign before and after expansion because AHK will swallow the + sign on numeric strings and turn it into a number.
-        Current := 0
-        Action := newValue
+        _amount .= this._stepSize
 
-        if (InStr(Action, "+") = 1 || InStr(Action, "-") = 1)
-            _action := Action "" this._stepSize
-        else
-            _action := Action
-        WriteDebug("Changing volume", _action, "debug", this.moduleName)
-
-        if (WinVer >= WIN_Vista)
-        {
-            if (InStr(Action, "+") = 1 || InStr(Action, "-") = 1) {
-                Action .= this._stepSize
-                Current := VA_GetMasterVolume()
+        if (InStr(newValue, "+") == 1 || InStr(newValue, "-") == 1) {
+            if (newValue == "+"){
+                Send {volume_up %_amount%}
+                a2log_debug("Changing volume", newValue "" _amount, this.moduleName)
             }
-            if (Action = "mute")
-                VA_SetMasterMute(1)
-            else if (Action = "unmute")
-                VA_SetMasterMute(0)
-            else if (Action = "toggle" && VA_GetMasterMute())
-                VA_SetMasterMute(0)
-            else if (Action = "toggle")
-                VA_SetMasterMute(1)
-            else
-            {
-                VA_SetMasterMute(0) ;If setting volume we probably don't want to stay muted.
-                VA_SetMasterVolume(Current+Action)
-            }
-            if (this._showNotification)
-            {
-
-                if (!Settings.VolumeManager_NotificationWindow)
-                    Settings.VolumeManager_NotificationWindow := Notify("Volume","","", VA_GetMasterMute() ? NotifyIcons.SoundMute : NotifyIcons.Sound, "ToggleMute", {min : 0, max : 0, value : VA_GetMasterVolume()})
-                Else
-                    Settings.VolumeManager_NotificationWindow.Progress := VA_GetMasterVolume()
-                SetTimer, ClearNotifyID, -1500
+            if (newValue == "-"){
+                Send {volume_down %_amount%}
+                a2log_debug("Changing volume", newValue "" _amount, this.moduleName)
             }
         }
-        else
+        if newValue in mute,unmute,toggle
         {
-            if (InStr(Action, "+") = 1 || InStr(Action, "-") = 1)
-                SoundGet, Current
-            if (Action = "mute")
-                SoundSet, 1,, Mute
-            else if (Action = "unmute")
-                SoundSet, 0,, Mute
-            else if (Action = "toggle" && SoundGet("","Mute"))
-                SoundSet, 1,, Mute
-            else if (Action = "toggle")
-                SoundSet, 0,, Mute
-            else
-            {
-                SoundSet, 0,, Mute ;If setting volume we probably don't want to stay muted.
-                SoundSet, % Current + Action
-            }
-            if (this._showNotification)
-            {
-                if (!Settings.VolumeManager_NotificationWindow)
-                    Settings.VolumeManager_NotificationWindow := Notify("Volume","","", SoundGet("", "Mute") ? NotifyIcons.SoundMute : NotifyIcons.Sound, "ToggleMute", {min : 0, max : 0, value : SoundGet("", "Volume")})
-                else
-                    Settings.VolumeManager_NotificationWindow.Progress := SoundGet("", "Volume")
-                SetTimer, ClearNotifyID, -1500
-            }
+            Send {volume_mute}
+            a2log_debug("Changing volume", newValue, this.moduleName)
         }
+
         return 1
     }
 
@@ -154,20 +114,6 @@ class VolumeManager
     _defaultBehavior(key)
     {
         Send, {%key%}
-    }
-
-    /**
-     * Private Property
-     *     Should the Notification Window be shown?
-     *
-     * @type bool
-     */
-    _showNotification[]
-    {
-        get {
-            global VolumeManager_ShowNotification
-            return (VolumeManager_ShowNotification == true) ? true : false
-        }
     }
 
     /**
