@@ -75,7 +75,7 @@ AutoCorrect_Init()
 {
     global AutoCorrect_Hoty_Enabled, AutoCorrect_Hoty_Keys
 
-    a2log_info("Initializing module", "", "AutoCorrect")
+    a2log_info("Initializing module", "AutoCorrect")
 
     if (AutoCorrect_Hoty_Enabled == true)
     {
@@ -101,7 +101,7 @@ AutoCorrect_AddCustom()
 {
     global AutoCorrect_AutoReload
 
-    a2log_debug("Adding custom element", "", "AutoCorrect")
+    a2log_debug("Adding custom element", "AutoCorrect")
 
     thisFile := a2.Path "\" a2.Modules "\ol.modules\AutoCorrect\AutoCorrect.ahk"
     tt(thisFile)
@@ -133,7 +133,7 @@ AutoCorrect_AddCustom()
     if ErrorLevel <> 0  ; The user pressed Cancel.
         return
     ; Otherwise, add the hotstring and reload the script:
-    a2log_debug("Storing custom element", Hotstring, "AutoCorrect")
+    a2log_debug("Storing custom element: " Hotstring, "AutoCorrect")
     FileAppend, `n%Hotstring%, %thisFile%  ; Put a `n at the beginning in case file lacks a blank line at its end.
     Notify(AutoCorrect, Added new custom correction, 3, NotifyIcons.Success)
     sleep 500
@@ -2030,7 +2030,7 @@ return  ; This makes the above hotstrings do nothing so that they override the i
 ::ecomonic::economic
 ::eceonomy::economy
 ::esctasy::ecstasy
-::eles::eels
+; ::eles::eels
 ::effeciency::efficiency
 ::efficency::efficiency
 ::effecient::efficient
@@ -2538,7 +2538,7 @@ return  ; This makes the above hotstrings do nothing so that they override the i
 ::haviest::heaviest
 ::heidelburg::Heidelberg
 ::hieght::height
-::hier::heir
+; ::hier::heir
 ::heirarchy::heirarchy
 ::helment::helmet
 ::halp::help

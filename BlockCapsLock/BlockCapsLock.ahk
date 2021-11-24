@@ -8,7 +8,7 @@
  * @return
  */
 
-a2log_info("Initializing module", "", "BlockCapsLock")
+a2log_info("Initializing module", "BlockCapsLock")
 
 BlockCapsLock_callback()
 {
@@ -18,8 +18,8 @@ BlockCapsLock_callback()
     {
         ; Toggle key state
         SetCapsLockstate, % GetKeyState("CapsLock","T") ? "Off":"On"
-        a2log_debug("BlockCaps: Toggled", "", "BlockCapsLock")
+        a2log_debug("BlockCaps: Toggled", "BlockCapsLock")
     } else {
-        a2log_debug("BlockCaps: Blocked Capslock", "", "BlockCapsLock")
+        a2log_debug("BlockCaps: Blocked Capslock", "BlockCapsLock")
     }
 }

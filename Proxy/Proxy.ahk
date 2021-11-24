@@ -10,11 +10,11 @@
 Proxy_Init()
 {
     If (!(IsObject(Settings))) {
-        a2log_error("Proxy: Settings class does not exist or was not instanciated", "", "Proxy")
+        a2log_error("Proxy: Settings class does not exist or was not instanciated", "Proxy")
         return false
     }
     Settings.Proxy := new CProxy()
-    a2log_info("Proxy: Proxy injected in Settings", "", "Proxy")
+    a2log_info("Proxy: Proxy injected in Settings", "Proxy")
 }
 
 class CProxy

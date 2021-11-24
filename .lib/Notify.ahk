@@ -19,12 +19,12 @@ Notify(Title, Text, Timeout = "", Icon = "") {
 
 Class NotifyIcons
 {
-    Info := ExtractIcon(ExpandPathPlaceholders("%WINDIR%\System32\shell32.dll"), WinVer >= WIN_Vista ? 222 : 136)
-    Error := ExtractIcon(ExpandPathPlaceholders("%WINDIR%\System32\shell32.dll"), WinVer >= WIN_Vista ? 78 : 110)
-    Warning := ExtractIcon(ExpandPathPlaceholders("%WINDIR%\System32\shell32.dll"), 78)
-    Success := ExtractIcon(ExpandPathPlaceholders("%WINDIR%\System32\shell32.dll"), WinVer >= WIN_Vista ? 145 : 136)
-    Internet := ExtractIcon(ExpandPathPlaceholders("%WINDIR%\System32\shell32.dll"), 136)
-    Sound := ExtractIcon(ExpandPathPlaceholders("%WINDIR%\System32\SndVol.exe"), 2)
-    SoundMute := ExtractIcon(ExpandPathPlaceholders("%WINDIR%\System32\SndVol.exe"), 3)
-    Question := ExtractIcon(ExpandPathPlaceholders("%WINDIR%\System32\shell32.dll"), 24)
+    Info := ExtractIcon(ResolvePath("%WINDIR%\System32\shell32.dll"), WinVer >= WIN_Vista ? 222 : 136)
+    Error := ExtractIcon(ResolvePath("%WINDIR%\System32\shell32.dll"), WinVer >= WIN_Vista ? 78 : 110)
+    Warning := ExtractIcon(ResolvePath("%WINDIR%\System32\shell32.dll"), 78)
+    Success := ExtractIcon(ResolvePath("%WINDIR%\System32\shell32.dll"), WinVer >= WIN_Vista ? 145 : 136)
+    Internet := ExtractIcon(ResolvePath("%WINDIR%\System32\shell32.dll"), 136)
+    Sound := ExtractIcon(ResolvePath("%WINDIR%\System32\SndVol.exe"), 2)
+    SoundMute := ExtractIcon(ResolvePath("%WINDIR%\System32\SndVol.exe"), 3)
+    Question := ExtractIcon(ResolvePath("%WINDIR%\System32\shell32.dll"), 24)
 }

@@ -206,6 +206,45 @@ ExtractIcon(Filename, IconNumber = 0, IconSize = 64) {
     return 0
 }
 
+ResolvePath(InputString) {
+    InputString := resolveEnvVars(InputString)
+    InputString := resolveCustomVars(InputString)
+    InputString := resolveScriptVars(InputString)
+
+    return InputString
+}
+
+resolveEnvVars(InputString) {
+    if (RegExMatch(InputString, "O)%(.+?)%", EnvVar)) {
+        value := EnvGet(EnvVar.Value(1)) ? EnvGet(EnvVar.Value(1)) : ""
+        if (value)
+            InputString := StringReplace(InputString, "%" EnvVar.Value(1) "%", value, "All")
+    }
+    return InputString
+}
+
+resolveCustomVars(InputString) {
+    static Replacements := { "Desktop": A_Desktop
+        , "MyDocuments": A_MyDocuments
+        , "StartMenu": A_StartMenu
+        , "StartMenuCommon": A_StartMenuCommon
+        , "a2Dir": A_ScriptDir "\.." }
+
+    for Placeholder, Replacement in Replacements
+        InputString := StringReplace(InputString, "%" Placeholder "%", Replacement, "All")
+
+    return InputString
+}
+
+resolveScriptVars(InputString) {
+    if (RegExMatch(InputString, "O)%(.+?)%", CustomVar)) {
+        temp := CustomVar.Value(1)
+        StringTrimLeft, value, %temp%, 0
+        return StringReplace(InputString, "%" CustomVar.Value(1) "%", value, "All")
+    }
+    return InputString
+}
+
 /**
  * Helper Function
  *     Expand path placeholders
@@ -223,30 +262,7 @@ ExtractIcon(Filename, IconNumber = 0, IconSize = 64) {
  *
  * @docu   https://msdn.microsoft.com/en-us/library/windows/desktop/ms724265(v=vs.85).aspx
  */
-ExpandPathPlaceholders(InputString) {
-    static Replacements := {  "Desktop" :             GetFullPathName(A_Desktop)
-                            , "MyDocuments" :        GetFullPathName(A_MyDocuments)
-                            , "StartMenu" :            GetFullPathName(A_StartMenu)
-                            , "StartMenuCommon" :     GetFullPathName(A_StartMenuCommon)
-                            , "a2Dir" :            A_ScriptDir "\.."}
 
-    for Placeholder, Replacement in Replacements
-        while(InStr(InputString, Placeholder) && A_Index < 10)
-            StringReplace, InputString, InputString, % "%" Placeholder "%", % Replacement, All
-
-    ; get the required size for the expanded string
-    SizeNeeded := DllCall("ExpandEnvironmentStrings", "Str", InputString, "PTR", 0, "Int", 0)
-    if (SizeNeeded == "" || SizeNeeded <= 0)
-        return InputString ; unable to get the size for the expanded string for some reason
-
-    ByteSize := SizeNeeded * 2 + 2
-    VarSetCapacity(TempValue, ByteSize, 0)
-
-    ; attempt to expand the environment string
-    if (!DllCall("ExpandEnvironmentStrings", "Str", InputString, "Str", TempValue, "Int", SizeNeeded))
-        return InputString ; unable to expand the environment string
-    return TempValue
-}
 
 /**
  * Helper Function
@@ -263,5 +279,7 @@ ExpandPathPlaceholders(InputString) {
 GetFullPathName(sPath) {
     VarSetCapacity(lPath,A_IsUnicode ? 520 : 260, 0)
     DllCall("GetLongPathName", Str, sPath, Str, lPath, UInt, 260)
+    a2log_info("GetFullPathName" sPath, "dynSnips")
+    a2log_info("GetFullPathName" lPath, "dynSnips")
     return lPath
 }

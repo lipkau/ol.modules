@@ -15,7 +15,7 @@
  *       - integrate with ImageUpload
  */
 
-a2log_info("Initializing module", "", "ImageConverter")
+a2log_info("Initializing module", "ImageConverter")
 
 class CImageConverterAction
 {
@@ -33,13 +33,13 @@ class CImageConverterAction
             for index, window in CImageConverter.Instances ;Find existing instance of window
                 if (window.ReuseWindow)
                 {
-                    a2log_debug("Reusing active ImageConverter window", window, "ImageConverter")
+                    a2log_debug("Reusing active ImageConverter window: " window, "ImageConverter")
                     ImageConverter := window
                     break
                 }
         if (!ImageConverter)
             ImageConverter := new CImageConverter(this)
-        a2log_debug("Adding files to ImageConverter: ", Files, "ImageConverter")
+        a2log_debug("Adding files to ImageConverter: " Files, "ImageConverter")
         ImageConverter.AddFiles(Files)
         return 1
     }
@@ -314,7 +314,7 @@ class CImageConverter extends CGUI
     Picture_Click()
     {
         ; TODO
-        ; ImageEditor := ExpandPathPlaceholders(Settings.Misc.DefaultImageEditor)
+        ; ImageEditor := ResolvePath(Settings.Misc.DefaultImageEditor)
         ; if (FileExist(ImageEditor))
         ;     OpenFileWithProgram(this.Picture.Picture, ImageEditor)
         ; else
@@ -392,7 +392,7 @@ class CImageConverter extends CGUI
             pBitmap := Gdip_CreateBitmapFromFile(Source)
             if (pBitmap)
             {
-                if (Source = Target || Gdip_SaveBitmapToFile(pBitmap, ExpandPathPlaceholders(Target), this.editQuality.Text) = 0)
+                if (Source = Target || Gdip_SaveBitmapToFile(pBitmap, ResolvePath(Target), this.editQuality.Text) = 0)
                     ConvertedImages.Insert(Target)
                 else
                     FailedImages.Insert(Source)

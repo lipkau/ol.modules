@@ -2,7 +2,7 @@
 ; author: Oliver Lipkau <https://github.com/lipkau>
 ; created: 2016 11 25
 
-#include <os>
+;#include <path>
 #include %A_LineFile%\..\..\.lib\Notify.ahk
 #include %A_LineFile%\..\..\.lib\helpers.ahk
 #include %A_LineFile%\..\..\ExplorerExtension\ExplorerHelpers.ahk
@@ -37,7 +37,7 @@ class ExplorerReplace
         }
 
 
-        a2log_info("Initializing module", "", "ExplorerReplace")
+        a2log_info("Initializing module", "ExplorerReplace")
 
         if (ExplorerReplace_RegisterInContextMenu == true)
         {
@@ -348,14 +348,14 @@ Class CReplaceDialog
             key := SubStr(key, 2)
             if (WinGetClass("ahk_id " value) = "Button")
             {
-                a2log_debug("button " ControlGetText("", "ahk_id " value), "", "ExplorerReplace")
+                a2log_debug("button " ControlGetText("", "ahk_id " value), "ExplorerReplace")
                 this[key] := ControlGet("Checked","","", "ahk_id " value)
             }
             else if (WinGetClass("ahk_id " value) = "Edit")
                 this[key] := ControlGetText("", "ahk_id " value)
             else if (WinGetClass("ahk_id " value) = "ComboBox")
                 this[key] := ControlGetText("", "ahk_id " value)
-            a2log_debug(key "=" this[key] ", hwnd=" value ", class = " WinGetClass("ahk_id " value), "", "ExplorerReplace")
+            a2log_debug(key "=" this[key] ", hwnd=" value ", class = " WinGetClass("ahk_id " value), "ExplorerReplace")
         }
         this.SearchResults := Array()
         LV_Delete()
@@ -375,7 +375,7 @@ Class CReplaceDialog
             this.CreateFilenameSearchTree(this.DirectoryTree)
             if (!this.Stop)
             {
-                this.CheckForDuplicates(this.DirectoryTree, JoinPath(this.DirectoryTree.Path, this.DirectoryTree.Name), Array())
+                this.CheckForDuplicates(this.DirectoryTree, path_join(this.DirectoryTree.Path, this.DirectoryTree.Name), Array())
                 if (!this.Stop)
                 {
                     this.FlattenTree(this.DirectoryTree)
@@ -435,7 +435,7 @@ Class CReplaceDialog
         if (this.InSelectedFiles && Root = this.DirectoryTree) ;Base directory, skip files which are not in selection
             Selection := Navigation.GetSelectedFilepaths(this.Parent)
         items := 0
-        Loop % JoinPath(JoinPath(Root.Path, Root.Name), "*"), 1, 0
+        Loop % path_join(path_join(Root.Path, Root.Name), "*"), 1, 0
         {
             if (this.Stop)
                 return 0
@@ -488,6 +488,7 @@ Class CReplaceDialog
         }
     }
 
+
     ; This function checks for duplicates and modifies the new filenames appropriately
     CheckForDuplicates(Root, RootPath, PathsList)
     {
@@ -497,8 +498,8 @@ Class CReplaceDialog
         {
             if (this.Stop)
                 return 0
-            OldPath := JoinPath(RootPath, Root[index].Name)
-            NewPath := Root[index].NewFilename ? JoinPath(RootPath, Root[index].NewFilename) : OldPath
+            OldPath := path_join(RootPath, Root[index].Name)
+            NewPath := Root[index].NewFilename ? path_join(RootPath, Root[index].NewFilename) : OldPath
             if (this.CollidingAction = "Append (Number)")
             {
                 SplitPath, NewPath,, dir, extension, filename
@@ -531,8 +532,8 @@ Class CReplaceDialog
         {
             if (this.Stop)
                 return 0
-            OldPath := JoinPath(RootPath, Root[A_Index].Name)
-            NewPath := JoinPath(RootPath, Root[A_Index].FixedNewFilename ? Root[A_Index].FixedNewFilename : Root[A_Index].NewFilename)
+            OldPath := path_join(RootPath, Root[A_Index].Name)
+            NewPath := path_join(RootPath, Root[A_Index].FixedNewFilename ? Root[A_Index].FixedNewFilename : Root[A_Index].NewFilename)
             if (Root[A_Index].Enabled && Root[A_Index].NewFilename)
             {
                 if (!Root[A_Index].Directory)
@@ -649,7 +650,7 @@ Class CReplaceDialog
             if (this.TrimLineEnd && this.TrimLineEndEdit)
             {
                 NewText := RTrim(NewText, this.TrimLineEndEdit)
-                a2log_debug("trimmed " newtext, "", "ExplorerReplace")
+                a2log_debug("trimmed " newtext, "ExplorerReplace")
             }
             if (this.InsertLineChars && this.InsertLineCharsEdit && IsNumeric(this.InsertLineCharsPos) && this.InsertLineCharsPos >= 0)
             {
@@ -716,7 +717,7 @@ Class CReplaceDialog
         if (this.InSelectedFiles) ;skip files which are not in selection
             Selection := Navigation.GetSelectedFilepaths(this.Parent)
         items := 0
-        Loop % JoinPath(this.BasePath, "*"), 0, % this.IncludeSubdirectories
+        Loop % path_join(this.BasePath, "*"), 0, % this.IncludeSubdirectories
         {
             if (this.Stop)
                 return 0
@@ -800,7 +801,7 @@ Class CReplaceDialog
                     Enabled := false
                  LV_GetText(Name, A_EventInfo, 1)
                  LV_GetText(Path, A_EventInfo, 2)
-                 Path := JoinPath(this.BasePath, Path)
+                 Path := path_join(this.BasePath, Path)
                 TreeItem := this.FindTreeItem(this.DirectoryTree, Path, Name)
                 TreeItem.Enabled := Enabled
             }
@@ -815,7 +816,7 @@ Class CReplaceDialog
                     Enabled := false
                  LV_GetText(Path, A_EventInfo, 1)
                  LV_GetText(LineNumber, A_EventInfo, 2)
-                 Result := this.SearchResults.GetItemWithValue("Path", JoinPath(this.BasePath,Path)).Lines.GetItemWithValue("Line", LineNumber)
+                 Result := this.SearchResults.GetItemWithValue("Path", path_join(this.BasePath,Path)).Lines.GetItemWithValue("Line", LineNumber)
                 Result.Enabled := Enabled
             }
         }
@@ -1032,7 +1033,7 @@ Class CReplaceDialog
         global ExplorerWindows
         WinSetTitle, % "ahk_id " this.hWnd,,Working...,
         if (this.Filenames)
-            this.PerformFileNameReplace(this.DirectoryTree, JoinPath(this.DirectoryTree.Path, this.DirectoryTree.Name))
+            this.PerformFileNameReplace(this.DirectoryTree, path_join(this.DirectoryTree.Path, this.DirectoryTree.Name))
         else
             this.PerformFileContentReplace()
         if (this.Stop)
