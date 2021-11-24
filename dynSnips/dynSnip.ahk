@@ -7,18 +7,18 @@
  *     *
  */
 
-class dynSnips
+class dynSnips extends ModuleModel
 {
-    static ScriptName := "dynSnips"
     static h_menu
-    static _defaultSnipPath := "%AppData%\a2\ol.modules\dynSnips"
+    static _defaultSnipPath := a2module_data "\a2\ol.modules\dynSnips"
     static Settings := new SnipSettings()
     static _menuClicker
     static SnipExtenstion := "snip"
 
     Init()
     {
-        a2log_info("Initializing module", "", "dynSnips")
+        this.base.__New(A_LineFile)
+        a2log_info("Initializing module", "dynSnips")
 
         snip_path_run := this.snipPath
         if (!(InStr(FileExist(this.snipPath), "D"))) {
@@ -28,10 +28,10 @@ class dynSnips
 
         this._menuClicker := ObjBindMethod(this, "MenuClick")
 
-        _icon := this.scriptPath . "\a2icon_16.png"
-        Menu, snip_Root, Add,     % this.ScriptName, noOp
-        Menu, snip_Root, default, % this.ScriptName
-        Menu, snip_Root, Icon,    % this.ScriptName, %_icon%, , 0
+        _icon := this.module.Icon
+        Menu, snip_Root, Add,     % this.module.Name, noOp
+        Menu, snip_Root, default, % this.module.Name
+        Menu, snip_Root, Icon,    % this.module.Name, %_icon%, , 0
         Menu, snip_Root, Add
 
         snip_level := 0
@@ -71,6 +71,7 @@ class dynSnips
 
     ShowMenu()
     {
+        a2log_info("Using " this.snipPath, "dynSnips")
         h_menu := this.h_menu
         Menu, %h_menu%, Show
     }
@@ -87,7 +88,6 @@ class dynSnips
         ;~ menu := RegExReplace(A_ThisMenu, "_", " ")
         menu := A_ThisMenu
         item := A_ThisMenuItem
-        msgbox % menu "`n" item
 
         if (menu == "snip_Root")
            snip := item "." this.SnipExtenstion
@@ -159,9 +159,9 @@ class dynSnips
         get {
             global DynSnip_path
 
-            if (DynSnip_path)
-                return ExpandPathPlaceholders(DynSnip_path)
-            else
+            if (DynSnip_path) {
+                return ResolvePath(DynSnip_path)
+            } else
                 return this._defaultSnipPath
         }
     }
@@ -169,9 +169,7 @@ class dynSnips
     scriptPath[]
     {
         get {
-            global a2modules
-
-            return a2modules "\ol.modules\dynSnips"
+            return this.module.Path "\ol.modules\dynSnips"
         }
     }
 }

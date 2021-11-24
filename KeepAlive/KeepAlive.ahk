@@ -7,14 +7,10 @@
  *     *
  */
 
-class KeepAlive {
-    /**
-     * Module properties
-     */
-    static moduleBundle := "ol.modules"
-    static moduleName   := "KeepAlive"
-    static moduleHelp   := "https://github.com/lipkau/ol.modules/wiki/KeepAlive"
+#include <ModuleModel>
 
+class KeepAlive extends ModuleModel
+{
     /**
      * current state of the module
      *
@@ -34,7 +30,8 @@ class KeepAlive {
      */
     Init()
     {
-        a2log_info("Initializing module", "", this.moduleName)
+        this.base.__New(A_LineFile)
+        a2log_info("Initializing module", this.module.Name)
 
         this.timer := ObjBindMethod(this, "ResetTimeIdle")
         if (this._enabledByDefault)
@@ -47,7 +44,7 @@ class KeepAlive {
     ResetTimeIdle()
     {
         if (A_TimeIdle > this.timeout) {
-            a2log_info("Reset A_TimeIdle", "", this.moduleName)
+            a2log_info("Reset A_TimeIdle", this.module.Name)
 
             SendInput {ScrollLock}{ScrollLock}
         }
@@ -55,23 +52,23 @@ class KeepAlive {
 
     Activate()
     {
-        a2log_info("Activating module", "", this.moduleName)
-        a2log_debug("Using timeout of:", this.timeout, this.moduleName)
+        a2log_info("Activating module", this.module.Name)
+        a2log_debug("Using timeout of: " this.timeout, this.module.Name)
 
         timer := this.timer
         SetTimer, % timer, 2000
         this.active := true
-        notify(moduleName, "KeepAlive activated", 2, NotifyIcons.Success)
+        notify(module.Name, "KeepAlive activated", 2, NotifyIcons.Success)
     }
 
     Deactivate()
     {
-        a2log_info("Deactivating module", "", this.moduleName)
+        a2log_info("Deactivating module", this.module.Name)
 
         timer := this.timer
         SetTimer % timer, 2000
         this.active := false
-        notify(moduleName, "KeepAlive dectivated", 2, NotifyIcons.Success)
+        notify(module.Name, "KeepAlive dectivated", 2, NotifyIcons.Success)
     }
 
     /**

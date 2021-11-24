@@ -8,20 +8,14 @@
  *       - bit.ly - needs auth
  */
 
+#include <ModuleModel>
 #include %A_LineFile%\..\..\.lib\Notify.ahk
 
 /**
  * Class to control the shortening of URLs
  */
-class urlShortener
+class urlShortener extends ModuleModel
 {
-    /**
-     * Module properties
-     */
-    static moduleBundle := "ol.modules"
-    static moduleName   := "urlShortener"
-    static moduleHelp   := "https://github.com/lipkau/ol.modules/wiki/urlShortener"
-
     static _defaultService := "goo.gl"
 
     /**
@@ -30,8 +24,8 @@ class urlShortener
      */
     Execute()
     {
-        a2log_info("Executing ""urlShortener""", "", this.moduleName)
-        a2log_debug("Using service:", this.service, this.moduleName)
+        a2log_info("Executing ""urlShortener""", this.module.Name)
+        a2log_debug("Using service: " this.service, this.module.Name)
 
         ; Read clipboard
         longURL := clipboard
@@ -46,21 +40,21 @@ class urlShortener
 
             if (shortURL)
             {
-                a2log_debug("Short url:", shortURL, this.moduleName)
+                a2log_debug("Short url: " shortURL, this.module.Name)
 
                 ; Store shortend URL in clipboard
                 Clipboard := ShortURL
 
-                notify(this.moduleName, "URL shortened and copied to clipboard!", 2, NotifyIcons.Success)
+                notify(this.module.Name, "URL shortened and copied to clipboard!", 2, NotifyIcons.Success)
                 return 1
             } else {
-                a2log_error("Failed to connect to service", "", this.moduleName)
-                notify(this.moduleName, "An error occured while trying to connect to the server.", 2, NotifyIcons.Error)
+                a2log_error("Failed to connect to service", this.module.Name)
+                notify(this.module.Name, "An error occured while trying to connect to the server.", 2, NotifyIcons.Error)
                 return 0
             }
         } else {
-            a2log_error("invalid long URL:", longURL, this.moduleName)
-            notify(this.moduleName, "Clipboard does not contain a valid URL to shorten.", 2, NotifyIcons.Error)
+            a2log_error("invalid long URL: " longURL, this.module.Name)
+            notify(this.module.Name, "Clipboard does not contain a valid URL to shorten.", 2, NotifyIcons.Error)
         }
     }
 
@@ -93,13 +87,13 @@ class urlShortener
 
         POSTdata := "{""longUrl"": """ longURL """}"
 
-        a2log_debug("HTTPRequest request HEADER:", Headers, this.moduleName)
-        a2log_debug("HTTPRequest request Options:", Options, this.moduleName)
+        a2log_debug("HTTPRequest request HEADER: " Headers, this.module.Name)
+        a2log_debug("HTTPRequest request Options: " Options, this.module.Name)
 
         HTTPRequest(ApiURi , POSTdata, Headers, Options)
 
-        a2log_debug("HTTPRequest response HEADER:", Headers, this.moduleName)
-        a2log_debug("HTTPRequest response BODY:", POSTdata, this.moduleName)
+        a2log_debug("HTTPRequest response HEADER: " Headers, this.module.Name)
+        a2log_debug("HTTPRequest response BODY: " POSTdata, this.module.Name)
 
         obj := Jxon_Load(POSTdata)
         return % obj.id
@@ -120,13 +114,13 @@ class urlShortener
         Options .= Settings.Proxy.Enabled ? "Proxy: " Settings.Proxy.Address ":" Settings.Proxy.Port "`n" : ""
 
         apiURi .= "?action=shorturl&format=json&&url=" longURL
-        a2log_debug("HTTPRequest request HEADER:", Headers, this.moduleName)
-        a2log_debug("HTTPRequest request Options:", Options, this.moduleName)
+        a2log_debug("HTTPRequest request HEADER: " Headers, this.module.Name)
+        a2log_debug("HTTPRequest request Options: " Options, this.module.Name)
 
         HTTPRequest(ApiURi , POSTdata, Headers, Options)
 
-        a2log_debug("HTTPRequest response HEADER:", Headers, this.moduleName)
-        a2log_debug("HTTPRequest response BODY:", POSTdata, this.moduleName)
+        a2log_debug("HTTPRequest response HEADER: " Headers, this.module.Name)
+        a2log_debug("HTTPRequest response BODY: " POSTdata, this.module.Name)
 
         obj := Jxon_Load(POSTdata)
         if (obj.statusCode == 200)

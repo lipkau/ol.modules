@@ -3,6 +3,7 @@
 ; created: 2016 11 24
 
 #MaxHotkeysPerInterval 200
+#include <ModuleModel>
 #include %A_LineFile%\..\..\.lib\Notify.ahk
 
 /**
@@ -10,21 +11,13 @@
  *     *
  */
 
-class VolumeManager
+class VolumeManager extends ModuleModel
 {
-    /**
-     * Module properties
-     */
-    static moduleBundle := "ol.modules"
-    static moduleName   := "VolumeManager"
-    static moduleHelp   := "https://github.com/lipkau/ol.modules/wiki/VolumeManager"
-
     /**
      * Default value for the stepsize
      * @type int
      */
     static _defaultStepSize := 5
-
     static running := false
 
     /**
@@ -32,8 +25,9 @@ class VolumeManager
      */
     Init()
     {
+        this.base.__New(A_LineFile)
         ; Only debug message
-        a2log_info("Initializing module", "", this.moduleName)
+        a2log_info("Initializing module", this.module.Name)
     }
 
     /**
@@ -52,7 +46,7 @@ class VolumeManager
             if (this._WindowIsOverMouse(hwnd))
                 this.ChangeVolume(command)
             else {
-                a2log_debug("Hotkey ignored " A_ThisHotkey, "Not over window " hwnd, this.moduleName)
+                ; a2log_debug("Hotkey ignored " A_ThisHotkey ": Not over window " hwnd, this.module.Name)
                 this._defaultBehavior(A_ThisHotkey)
             }
         else
@@ -75,17 +69,17 @@ class VolumeManager
         if (InStr(newValue, "+") == 1 || InStr(newValue, "-") == 1) {
             if (newValue == "+"){
                 Send {volume_up %_amount%}
-                a2log_debug("Changing volume", newValue "" _amount, this.moduleName)
+                a2log_debug("Changing volume: " newValue "" _amount, this.module.Name)
             }
             if (newValue == "-"){
                 Send {volume_down %_amount%}
-                a2log_debug("Changing volume", newValue "" _amount, this.moduleName)
+                a2log_debug("Changing volume: " newValue "" _amount, this.module.Name)
             }
         }
         if newValue in mute,unmute,toggle
         {
             Send {volume_mute}
-            a2log_debug("Changing volume", newValue, this.moduleName)
+            a2log_debug("Changing volume: " newValue, this.module.Name)
         }
 
         return 1

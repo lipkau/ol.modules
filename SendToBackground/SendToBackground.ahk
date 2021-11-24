@@ -2,7 +2,7 @@
 ; author: Oliver Lipkau <https://github.com/lipkau>
 ; created: 2018 9 3
 
-#include lib\ahklib\ModuleModel.ahk
+#include <ModuleModel>
 #include %A_LineFile%\..\..\.lib\Notify.ahk
 
 class SendToBackground extends ModuleModel
@@ -27,7 +27,7 @@ class SendToBackground extends ModuleModel
         this.isRunning := False
         this.timer := ObjBindMethod(this, "SendCommand")
 
-        a2log_info("Initializing module", "", this.moduleName)
+        a2log_info("Initializing module", this.module.Name)
     }
 
     /**
@@ -36,7 +36,7 @@ class SendToBackground extends ModuleModel
     SetTarget()
     {
         this.TargetWindow := ""
-        a2log_debug("cleared target window", "", this.moduleName)
+        a2log_debug("cleared target window", this.module.Name)
 
         WinGet, active_pid, PID, A
         WinGetTitle, active_title, ahk_pid %active_pid%
@@ -44,14 +44,14 @@ class SendToBackground extends ModuleModel
         this.TargetWindow := active_pid
         if (this.TargetWindow)
         {
-            notify(this.moduleName, "Stored a new target window:`n" active_title, 4, NotifyIcons.Success)
-            a2log_debug("stored new target window", "", this.moduleName)
-            a2log_debug("stored window:", "[" active_pid "] " active_title, "debug", this.moduleName)
+            notify(this.module.Name, "Stored a new target window:`n" active_title, 4, NotifyIcons.Success)
+            a2log_debug("stored new target window", this.module.Name)
+            a2log_debug("stored window: [" active_pid "] " active_title, "debug", this.module.Name)
         }
         else
         {
-            notify(this.moduleName, "Failed to store new Target Window", 4, NotifyIcons.Error)
-            a2log_debug("failed to store new target window", "", this.moduleName)
+            notify(this.module.Name, "Failed to store new Target Window", 4, NotifyIcons.Error)
+            a2log_debug("failed to store new target window", this.module.Name)
         }
     }
 
@@ -62,15 +62,15 @@ class SendToBackground extends ModuleModel
     {
         if (!this._command)
         {
-            a2log_error("missing command", "", this.moduleName)
-            notify(this.moduleName, "No command has been defined that should be sent.", 4, NotifyIcons.Error)
+            a2log_error("missing command", this.module.Name)
+            notify(this.module.Name, "No command has been defined that should be sent.", 4, NotifyIcons.Error)
             return
         }
 
         if (!this.TargetWindow)
         {
-            a2log_error("missing target window", "", this.moduleName)
-            notify(this.moduleName, "No Target Window has been set.", 4, NotifyIcons.Error)
+            a2log_error("missing target window", this.module.Name)
+            notify(this.module.Name, "No Target Window has been set.", 4, NotifyIcons.Error)
             return
         }
 
