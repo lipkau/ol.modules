@@ -1,8 +1,9 @@
-[
+﻿[
   {
     "author": "Oliver Lipkau",
     "date": "2016 11 10",
     "description": "Create Snippets to insert anywhere",
+    "tags": [],
     "typ": "nfo",
     "url": "https://github.com/lipkau/ol.modules/wiki/dynSnips",
     "version": "0.1"
@@ -33,7 +34,7 @@
     "typ": "hotkey"
   },
   {
-    "browse_type": "0",
+    "browse_type": 0,
     "file_types": "",
     "label": "Snippet's path:",
     "name": "DynSnip_path",

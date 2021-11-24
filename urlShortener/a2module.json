@@ -1,8 +1,9 @@
-[
+﻿[
   {
     "author": "Oliver Lipkau",
     "date": "2016 11 13",
     "description": "Shorten a URL with one keystroke",
+    "tags": [],
     "typ": "nfo",
     "url": "https://github.com/lipkau/ol.modules/wiki/urlShortener",
     "version": "0.1"
@@ -16,6 +17,8 @@
     "enabled": true,
     "functionCode": "urlShortener.Execute()",
     "functionMode": 0,
+    "functionSend": "Send, ",
+    "functionURL": "Run, ",
     "key": "Win+S",
     "keyChange": true,
     "label": "Hotkey to shorten a URL",
